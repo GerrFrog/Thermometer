@@ -1,0 +1,6 @@
+mlx90614.c:38:9:CRC8_Calc	24	static
+mlx90614.c:50:6:MLX90614_WriteReg	40	static
+mlx90614.c:84:10:MLX90614_ReadReg	56	static
+mlx90614.c:109:7:MLX90614_ReadTemp	112	static
+mlx90614.c:119:5:MLX90614_ScanDevices	16	static
+mlx90614.c:137:6:MLX90614_SendDebugMsg	16	static
