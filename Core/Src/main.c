@@ -124,12 +124,15 @@ int main(void)
   // 13 - orange
   // 12 - green
   // 10x12 - 10 to right, 12 to below
+
+  // TODO:temp1 - I2C1, temp2 - I2C2, display - I2C3
   int mlx_address;
   float float_temp;
   char char_temp[8];
   uint8_t in_buff[2];
   char initializing_status[] = "initial...";
-  uint8_t *data = "Hello World from USB CDC\n";
+  uint8_t *message = "Temperature:\n";
+  uint8_t *end = '\n';
 
   // Initialize Display
   if (SSD1306_Init(hi2c2) != 1)
@@ -179,7 +182,9 @@ int main(void)
 
 	SSD1306_UpdateScreen();
 
-	CDC_Transmit_FS(data, strlen(data));
+	CDC_Transmit_FS(message, strlen(message));
+	CDC_Transmit_FS((uint8_t*)char_temp, strlen((uint8_t*)char_temp));
+	CDC_Transmit_FS(end, strlen(end));
 
 	HAL_Delay(100);
     /* USER CODE END WHILE */
