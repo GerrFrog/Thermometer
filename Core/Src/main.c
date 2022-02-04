@@ -44,9 +44,10 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
-uint8_t buffer[64];
-/* USER CODE BEGIN PV */
+I2C_HandleTypeDef hi2c3;
 
+/* USER CODE BEGIN PV */
+uint8_t buffer[64];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +55,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
+static void MX_I2C3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -74,8 +76,8 @@ void dtoc(double digit, char* arr)
 	}
 	int l_digit = digit * 100.0;
 	arr[7] = '\0';
-	arr[6] = 'C';
-	arr[5] = ' ';
+	arr[6] = '\0';
+	arr[5] = '\0';
 	arr[4] = l_digit % 10 + '0';
 	l_digit /= 10;
 	arr[3] = l_digit % 10 + '0';
@@ -118,6 +120,7 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_USB_DEVICE_Init();
+  MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
   // 15 - blue
   // 14 - red
@@ -126,38 +129,53 @@ int main(void)
   // 10x12 - 10 to right, 12 to below
 
   // TODO:temp1 - I2C1, temp2 - I2C2, display - I2C3
-  int mlx_address;
-  float float_temp;
-  char char_temp[8];
-  uint8_t in_buff[2];
-  char initializing_status[] = "initial...";
-  uint8_t *message = "Temperature:\n";
-  uint8_t *end = '\n';
+  int mlx_addr_1;
+  int mlx_addr_2;
+
+  float float_temp_1 = 0.0;
+  float float_temp_2 = 0.0;
+
+  char char_temp_1[8];
+  char char_temp_2[8];
+
+  uint8_t in_buff_1[2];
+  uint8_t in_buff_2[2];
+
+  char initializing_status[] = "initialize";
+  uint8_t *message_1 = "Temperature from 1st Sensor: \0";
+  uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
+  uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
+  uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
+  uint8_t *end = "\n\0";
 
   // Initialize Display
-  if (SSD1306_Init(hi2c2) != 1)
+  if (SSD1306_Init(hi2c3) != 1)
   {
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 	  HAL_Delay(1000);
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
   }
 
-  // Initialize MLX Sensor
+  // Initialize MLX Sensors
   SSD1306_GotoXY (0,0);
   SSD1306_Puts (initializing_status, &Font_11x18, 1);
   SSD1306_UpdateScreen();
 
-  mlx_address = MLX90614_ScanDevices(hi2c1);
+  mlx_addr_1 = MLX90614_ScanDevices(hi2c1);
+  mlx_addr_2 = MLX90614_ScanDevices(hi2c2);
 
-  if (HAL_I2C_Mem_Read(&hi2c1, (0x00<<1), 0x07, 1, in_buff, 2, 100) != HAL_OK)
+  if (HAL_I2C_Mem_Read(&hi2c1, (0x00<<1), 0x07, 1, in_buff_1, 2, 100) != HAL_OK)
   {
 	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-	  HAL_Delay(100);
+	  HAL_Delay(1000);
 	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-  } else {
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-	  HAL_Delay(100);
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+  }
+
+  if (HAL_I2C_Mem_Read(&hi2c2, (0x00<<1), 0x07, 1, in_buff_2, 2, 100) != HAL_OK)
+  {
+	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	  HAL_Delay(1000);
+	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
   }
 
   SSD1306_Clear();
@@ -168,23 +186,44 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	float_temp = MLX90614_ReadTemp(mlx_address, 0x07, hi2c1);
-	dtoc(float_temp, char_temp);
+	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, 0x07, hi2c1);
+	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, 0x07, hi2c2);
+
+	dtoc(float_temp_1, char_temp_1);
+	dtoc(float_temp_2, char_temp_2);
 
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
 	{
 		SSD1306_GotoXY(0, 0);
-		SSD1306_Puts(char_temp, &Font_16x26, 1);
+		SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+		SSD1306_GotoXY(70, 0);
+		SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+//		CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+//		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+//		CDC_Transmit_FS(end, strlen(end));
+//
+//		CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+//		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+//		CDC_Transmit_FS(end, strlen(end));
 	}
 
 	SSD1306_GotoXY(0, 29);
-	SSD1306_Puts(char_temp, &Font_11x18, 1);
+	SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+	SSD1306_GotoXY(70, 29);
+	SSD1306_Puts(char_temp_2, &Font_11x18, 1);
 
 	SSD1306_UpdateScreen();
 
-	CDC_Transmit_FS(message, strlen(message));
-	CDC_Transmit_FS((uint8_t*)char_temp, strlen((uint8_t*)char_temp));
-	CDC_Transmit_FS(end, strlen(end));
+//	CDC_Transmit_FS(message_1, strlen(message_1));
+//	CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+//	CDC_Transmit_FS(end, strlen(end));
+//
+//	CDC_Transmit_FS(message_2, strlen(message_2));
+//	CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+//	CDC_Transmit_FS(end, strlen(end));
 
 	HAL_Delay(100);
     /* USER CODE END WHILE */
@@ -307,6 +346,40 @@ static void MX_I2C2_Init(void)
 }
 
 /**
+  * @brief I2C3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C3_Init(void)
+{
+
+  /* USER CODE BEGIN I2C3_Init 0 */
+
+  /* USER CODE END I2C3_Init 0 */
+
+  /* USER CODE BEGIN I2C3_Init 1 */
+
+  /* USER CODE END I2C3_Init 1 */
+  hi2c3.Instance = I2C3;
+  hi2c3.Init.ClockSpeed = 400000;
+  hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c3.Init.OwnAddress1 = 0;
+  hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c3.Init.OwnAddress2 = 0;
+  hi2c3.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c3.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C3_Init 2 */
+
+  /* USER CODE END I2C3_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -320,6 +393,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
