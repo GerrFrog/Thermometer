@@ -200,13 +200,13 @@ int main(void)
 		SSD1306_GotoXY(70, 0);
 		SSD1306_Puts(char_temp_2, &Font_11x18, 1);
 
-//		CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
-//		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-//		CDC_Transmit_FS(end, strlen(end));
-//
-//		CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
-//		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-//		CDC_Transmit_FS(end, strlen(end));
+		CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+		CDC_Transmit_FS(end, strlen(end));
+
+		CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+		CDC_Transmit_FS(end, strlen(end));
 	}
 
 	SSD1306_GotoXY(0, 29);
@@ -217,13 +217,13 @@ int main(void)
 
 	SSD1306_UpdateScreen();
 
-//	CDC_Transmit_FS(message_1, strlen(message_1));
-//	CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-//	CDC_Transmit_FS(end, strlen(end));
-//
-//	CDC_Transmit_FS(message_2, strlen(message_2));
-//	CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-//	CDC_Transmit_FS(end, strlen(end));
+	CDC_Transmit_FS(message_1, strlen(message_1));
+	CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+	CDC_Transmit_FS(end, strlen(end));
+
+	CDC_Transmit_FS(message_2, strlen(message_2));
+	CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+	CDC_Transmit_FS(end, strlen(end));
 
 	HAL_Delay(100);
     /* USER CODE END WHILE */
