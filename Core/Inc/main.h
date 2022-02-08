@@ -34,6 +34,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "ssd1306.h"
 #include "mlx90614.h"
+#include "debug_mode.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -49,14 +50,16 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define USB_SEND 0
+#define DEBUG_MODE 1
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void dtoc(double digit, char* arr);
+void float_temp_to_char_temp(double digit, char* arr);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

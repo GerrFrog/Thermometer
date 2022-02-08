@@ -14,6 +14,7 @@
 /* Private defines -----------------------------------------------------------*/
 /* DEFAULT SLAVE ADDRESS */
 #define MLX90614_DEFAULT_SA 0x5A
+
 /* OPCODE DEFINES */
 #define MLX90614_OP_RAM		0x00
 #define MLX90614_OP_EEPROM	0x20
@@ -25,6 +26,7 @@
 #define MLX90614_TAMB 		(MLX90614_OP_RAM | 0x06) /* ambient temperature */
 #define MLX90614_TOBJ1 		(MLX90614_OP_RAM | 0x07) /* object 1 temperature */
 #define MLX90614_TOBJ2 		(MLX90614_OP_RAM | 0x08) /* object 2 temperature */
+
 /* EEPROM offsets with 16-bit data, MSB first */
 #define MLX90614_TOMIN 		(MLX90614_OP_EEPROM | 0x00) /* object temperature min register */
 #define MLX90614_TOMAX 		(MLX90614_OP_EEPROM | 0x01) /* object temperature max register */
@@ -43,14 +45,16 @@
 #define MLX90614_DBG_MSG_W 0
 #define MLX90614_DBG_MSG_R 1
 
-/* Exported functions prototypes ---------------------------------------------*/
-uint8_t CRC8_Calc(uint8_t*, const uint8_t);
-void MLX90614_WriteReg(uint8_t, uint8_t, uint16_t);
-uint16_t MLX90614_ReadReg(uint8_t, uint8_t, uint8_t, I2C_HandleTypeDef hi2c);
-float MLX90614_ReadTemp(uint8_t, uint8_t, I2C_HandleTypeDef hi2c);
+uint8_t CRC8_Calc (uint8_t *p, uint8_t len);
+
+void MLX90614_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_HandleTypeDef hi2c);
+
+uint16_t MLX90614_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c);
+
+float MLX90614_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c);
+
 int MLX90614_ScanDevices (I2C_HandleTypeDef hi2c);
-void MLX90614_SendDebugMsg(uint8_t, uint8_t, uint8_t, uint16_t, uint8_t, uint8_t);
 
+void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, uint16_t data, uint8_t crc_in, uint8_t crc_calc);
 
-
-#endif /* INC_MLX90614_H_ */
+#endif

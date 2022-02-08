@@ -47,7 +47,13 @@ I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c3;
 
 /* USER CODE BEGIN PV */
+char initializing_status[] = "initialize";
 uint8_t buffer[64];
+uint8_t *message_1 = "Temperature from 1st Sensor: \0";
+uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
+uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
+uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
+uint8_t *end = "\n\0";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,7 +68,14 @@ static void MX_I2C3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void dtoc(double digit, char* arr)
+/**
+ * @brief Convert temperature float type to temperature char type
+ *
+ * @param digit Temp value
+ * @param arr Pointer to output array
+ * @return void
+ */
+void float_temp_to_char_temp(double digit, char* arr)
 {
 	if (digit <= 10.0)
 	{
@@ -122,13 +135,15 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
-  // 15 - blue
-  // 14 - red
-  // 13 - orange
-  // 12 - green
-  // 10x12 - 10 to right, 12 to below
-
-  // TODO:temp1 - I2C1, temp2 - I2C2, display - I2C3
+  /**
+   * 12 - green, 13 - orange, 14 - red, 15 - blue
+   *
+   * Display 10x12 - 10 to right, 12 to below
+   *
+   * Temp sensor 1 - I2C1, temp sensor 2 - I2C2, Display - I2C3
+   *
+   *
+   */
   int mlx_addr_1;
   int mlx_addr_2;
 
@@ -137,16 +152,6 @@ int main(void)
 
   char char_temp_1[8];
   char char_temp_2[8];
-
-  uint8_t in_buff_1[2];
-  uint8_t in_buff_2[2];
-
-  char initializing_status[] = "initialize";
-  uint8_t *message_1 = "Temperature from 1st Sensor: \0";
-  uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
-  uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
-  uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
-  uint8_t *end = "\n\0";
 
   // Initialize Display
   if (SSD1306_Init(hi2c3) != 1)
@@ -164,33 +169,49 @@ int main(void)
   mlx_addr_1 = MLX90614_ScanDevices(hi2c1);
   mlx_addr_2 = MLX90614_ScanDevices(hi2c2);
 
-  if (HAL_I2C_Mem_Read(&hi2c1, (0x00<<1), 0x07, 1, in_buff_1, 2, 100) != HAL_OK)
-  {
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-	  HAL_Delay(1000);
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-  }
-
-  if (HAL_I2C_Mem_Read(&hi2c2, (0x00<<1), 0x07, 1, in_buff_2, 2, 100) != HAL_OK)
-  {
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-	  HAL_Delay(1000);
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-  }
-
   SSD1306_Clear();
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  if (DEBUG_MODE)
+  {
+	  char debug_status[] = "Debug mode";
+
+	  SSD1306_GotoXY (0,0);
+	  SSD1306_Puts (debug_status, &Font_11x18, 1);
+	  SSD1306_UpdateScreen();
+	  HAL_Delay(1000);
+	  SSD1306_Clear();
+
+	  // Emissivity
+	  char char_emissivity[7];
+	  float emissivity = MLX90614_ReadReg(mlx_addr_1, MLX90614_EMISSIVITY, MLX90614_DBG_OFF, hi2c1) / 65535; // max 65535
+
+	  int_emissivity_to_char_emissivity(emissivity, char_emissivity);
+	  display_output(EMISSIVITY_STATUS, char_emissivity);
+
+	  // Slave address
+	  char slave_address_char[6];
+	  int slave_address_int = MLX90614_ReadReg(mlx_addr_1, MLX90614_SA, MLX90614_DBG_OFF, hi2c1);
+
+	  int_address_to_char_address(slave_address_int, slave_address_char);
+	  display_output(SLAVE_ADDRESS_STATUS, slave_address_char);
+
+	  while(1)
+	  {
+
+	  }
+  }
+
   while (1)
   {
-	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, 0x07, hi2c1);
-	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, 0x07, hi2c2);
+	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, MLX90614_TOBJ1, hi2c1);
+	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
 
-	dtoc(float_temp_1, char_temp_1);
-	dtoc(float_temp_2, char_temp_2);
+	float_temp_to_char_temp(float_temp_1, char_temp_1);
+	float_temp_to_char_temp(float_temp_2, char_temp_2);
 
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
 	{
@@ -200,13 +221,16 @@ int main(void)
 		SSD1306_GotoXY(70, 0);
 		SSD1306_Puts(char_temp_2, &Font_11x18, 1);
 
-		CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
-		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-		CDC_Transmit_FS(end, strlen(end));
+		if (USB_SEND)
+		{
+			CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+			CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+			CDC_Transmit_FS(end, strlen(end));
 
-		CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
-		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-		CDC_Transmit_FS(end, strlen(end));
+			CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+			CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+			CDC_Transmit_FS(end, strlen(end));
+		}
 	}
 
 	SSD1306_GotoXY(0, 29);
@@ -217,13 +241,16 @@ int main(void)
 
 	SSD1306_UpdateScreen();
 
-	CDC_Transmit_FS(message_1, strlen(message_1));
-	CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-	CDC_Transmit_FS(end, strlen(end));
+	if (USB_SEND)
+	{
+		CDC_Transmit_FS(message_1, strlen(message_1));
+		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+		CDC_Transmit_FS(end, strlen(end));
 
-	CDC_Transmit_FS(message_2, strlen(message_2));
-	CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-	CDC_Transmit_FS(end, strlen(end));
+		CDC_Transmit_FS(message_2, strlen(message_2));
+		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+		CDC_Transmit_FS(end, strlen(end));
+	}
 
 	HAL_Delay(100);
     /* USER CODE END WHILE */
@@ -327,7 +354,7 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.ClockSpeed = 400000;
+  hi2c2.Init.ClockSpeed = 100000;
   hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c2.Init.OwnAddress1 = 0;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;

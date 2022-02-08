@@ -33,6 +33,7 @@ USB_DEVICE/App/usb_device.o: ../USB_DEVICE/App/usb_device.c \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  ../USB_DEVICE/Target/usbd_conf.h ../Core/Inc/main.h \
  ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h ../Core/Inc/mlx90614.h \
+ ../Core/Inc/debug_mode.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
@@ -116,6 +117,8 @@ USB_DEVICE/App/usb_device.o: ../USB_DEVICE/App/usb_device.c \
 ../Core/Inc/ssd1306_fonts.h:
 
 ../Core/Inc/mlx90614.h:
+
+../Core/Inc/debug_mode.h:
 
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 
