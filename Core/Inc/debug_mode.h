@@ -12,14 +12,24 @@
 #include "ssd1306.h"
 
 //char emissivity_status[] = "Emissivity: ";
+#define HEX2DEX "hex2dec"
+#define TO_MAX_STATUS "To max:"
+#define TO_MIN_STATUS "To min:"
+#define PWM_CF_REG_STATUS "PWM Cf Reg:"
+#define TA_RANGE_STATUS "Ta range"
 #define EMISSIVITY_STATUS "Emissivity:"
-#define SLAVE_ADDRESS_STATUS "SA:"
+#define CONFIG_REGISTER_STATUS "Config Reg:"
+#define SLAVE_ADDRESS_STATUS "Slave addr:"
+#define ID1_STATUS "ID1 Reg:"
+#define ID2_STATUS "ID2 Reg:"
+#define ID3_STATUS "ID3 Reg:"
+#define ID4_STATUS "ID4 Reg:"
 
 void int_emissivity_to_char_emissivity(int emissivity, char* arr);
 
 void int_address_to_char_address(int address, char* arr);
 
-void display_output(char* message, char* char_emissivity);
+void display_output(char* message, char* char_emissivity, char hex);
 
 
 #endif /* INC_DEBUG_MODE_H_ */

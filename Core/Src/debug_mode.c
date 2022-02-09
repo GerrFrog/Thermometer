@@ -56,16 +56,24 @@ void int_address_to_char_address(int address, char* arr)
  * @param char_param Parameter to output
  * @return void
  */
-void display_output(char* message, char* char_param)
+void display_output(char* message, char* char_param, char hex)
 {
 	SSD1306_GotoXY (0,0);
 	SSD1306_Puts (message, &Font_11x18, 1);
 	SSD1306_UpdateScreen();
+
 	HAL_Delay(1500);
 	SSD1306_Clear();
+
 	SSD1306_GotoXY (0,0);
 	SSD1306_Puts (char_param, &Font_11x18, 1);
+	if (hex > 0)
+	{
+		SSD1306_GotoXY (0,20);
+		SSD1306_Puts (HEX2DEX, &Font_11x18, 1);
+	}
 	SSD1306_UpdateScreen();
+
 	HAL_Delay(1500);
 	SSD1306_Clear();
 }
