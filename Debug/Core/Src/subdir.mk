@@ -8,6 +8,7 @@ C_SRCS += \
 ../Core/Src/debug_mode.c \
 ../Core/Src/main.c \
 ../Core/Src/mlx90614.c \
+../Core/Src/mlx90632.c \
 ../Core/Src/ssd1306.c \
 ../Core/Src/ssd1306_fonts.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
@@ -20,6 +21,7 @@ OBJS += \
 ./Core/Src/debug_mode.o \
 ./Core/Src/main.o \
 ./Core/Src/mlx90614.o \
+./Core/Src/mlx90632.o \
 ./Core/Src/ssd1306.o \
 ./Core/Src/ssd1306_fonts.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
@@ -32,6 +34,7 @@ C_DEPS += \
 ./Core/Src/debug_mode.d \
 ./Core/Src/main.d \
 ./Core/Src/mlx90614.d \
+./Core/Src/mlx90632.d \
 ./Core/Src/ssd1306.d \
 ./Core/Src/ssd1306_fonts.d \
 ./Core/Src/stm32f4xx_hal_msp.d \

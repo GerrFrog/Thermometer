@@ -23,8 +23,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usb_device.h"
-#include "usbd_cdc_if.h"
+#ifdef USB_SEND
+	#include "usb_device.h"
+	#include "usbd_cdc_if.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,13 +49,7 @@ I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c3;
 
 /* USER CODE BEGIN PV */
-char initializing_status[] = "initialize";
 uint8_t buffer[64];
-uint8_t *message_1 = "Temperature from 1st Sensor: \0";
-uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
-uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
-uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
-uint8_t *end = "\n\0";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -153,29 +149,59 @@ int main(void)
   char char_temp_1[8];
   char char_temp_2[8];
 
+#ifdef USB_SEND
+  uint8_t *message_1 = "Temperature from 1st Sensor: \0";
+  uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
+  uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
+  uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
+  uint8_t *end = "\n\0";
+#endif
+
   // Initialize Display
-  if (SSD1306_Init(hi2c3) != 1)
+#ifdef SSD1306_DISPLAY
   {
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-	  HAL_Delay(1000);
-	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	  char initializing_status[] = "initialize";
+	  if (SSD1306_Init(hi2c3) != 1)
+	  {
+		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		  HAL_Delay(1000);
+		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	  }
+
+	  SSD1306_GotoXY (0,0);
+	  SSD1306_Puts (initializing_status, &Font_11x18, 1);
+	  SSD1306_UpdateScreen();
   }
+#endif
 
-  // Initialize MLX Sensors
-  SSD1306_GotoXY (0,0);
-  SSD1306_Puts (initializing_status, &Font_11x18, 1);
-  SSD1306_UpdateScreen();
-
+#ifdef MLX90614
   mlx_addr_1 = MLX90614_ScanDevices(hi2c1);
   mlx_addr_2 = MLX90614_ScanDevices(hi2c2);
+#elif defined(MLX90632)
 
+#endif
+
+#ifdef SSD1306_DISPLAY
   SSD1306_Clear();
+#endif
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  if (DEBUG_MODE)
+#ifdef FLASH_MODE
+  {
+	  MLX90614_WriteReg(mlx_addr_1, MLX90614_EMISSIVITY, (uint16_t)0xF332, hi2c1);
+	  while(1)
+	  {
+		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+
+		  HAL_Delay(100);
+	  }
+  }
+#endif
+
+#ifdef DEBUG_MODE
   {
 	  char debug_status[] = "Debug mode";
 
@@ -206,9 +232,12 @@ int main(void)
 	  int_address_to_char_address(int_ta_range, char_ta_range);
 
 	  // Emissivity
-	  char char_emissivity[7];
-	  float emissivity = MLX90614_ReadReg(mlx_addr_1, MLX90614_EMISSIVITY, MLX90614_DBG_OFF, hi2c1) / 65535; // max 65535
-	  int_emissivity_to_char_emissivity(emissivity, char_emissivity);
+//	  char char_emissivity[7];
+//	  float emissivity = MLX90614_ReadReg(mlx_addr_1, MLX90614_EMISSIVITY, MLX90614_DBG_OFF, hi2c1) / 65535; // max 65535
+//	  int_emissivity_to_char_emissivity(emissivity, char_emissivity);
+	  char char_emissivity[6];
+	  int emissivity = MLX90614_ReadReg(mlx_addr_1, MLX90614_EMISSIVITY, MLX90614_DBG_OFF, hi2c1); // max 65535
+	  int_address_to_char_address(emissivity, char_emissivity);
 
 	  // Configutation register
 	  char char_conf_reg[7];
@@ -256,23 +285,30 @@ int main(void)
 	  }
   }
 
+#endif
+
   while (1)
   {
+#if defined(MLX90614)
 	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, MLX90614_TOBJ1, hi2c1);
 	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
+#elif defined(MLX90632)
 
+#endif
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 	float_temp_to_char_temp(float_temp_2, char_temp_2);
 
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
 	{
+#ifdef SSD1306_DISPLAY
 		SSD1306_GotoXY(0, 0);
 		SSD1306_Puts(char_temp_1, &Font_11x18, 1);
 
 		SSD1306_GotoXY(70, 0);
 		SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#endif
 
-		if (USB_SEND)
+#ifdef USB_SEND
 		{
 			CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
 			CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
@@ -282,8 +318,10 @@ int main(void)
 			CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
 			CDC_Transmit_FS(end, strlen(end));
 		}
+#endif
 	}
 
+#ifdef SSD1306_DISPLAY
 	SSD1306_GotoXY(0, 29);
 	SSD1306_Puts(char_temp_1, &Font_11x18, 1);
 
@@ -291,8 +329,9 @@ int main(void)
 	SSD1306_Puts(char_temp_2, &Font_11x18, 1);
 
 	SSD1306_UpdateScreen();
+#endif
 
-	if (USB_SEND)
+#ifdef USB_SEND
 	{
 		CDC_Transmit_FS(message_1, strlen(message_1));
 		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
@@ -302,6 +341,7 @@ int main(void)
 		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
 		CDC_Transmit_FS(end, strlen(end));
 	}
+#endif
 
 	HAL_Delay(100);
     /* USER CODE END WHILE */
