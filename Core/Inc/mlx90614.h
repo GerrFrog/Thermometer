@@ -11,7 +11,6 @@
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
 
-/* Private defines -----------------------------------------------------------*/
 /* DEFAULT SLAVE ADDRESS */
 #define MLX90614_DEFAULT_SA 0x5A
 
@@ -45,7 +44,7 @@
 #define MLX90614_DBG_MSG_W 0
 #define MLX90614_DBG_MSG_R 1
 
-uint8_t CRC8_Calc (uint8_t *p, uint8_t len);
+uint8_t CRC8_Calc(uint8_t *p, uint8_t len);
 
 void MLX90614_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_HandleTypeDef hi2c);
 
@@ -53,7 +52,7 @@ uint16_t MLX90614_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C
 
 float MLX90614_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c);
 
-int MLX90614_ScanDevices (I2C_HandleTypeDef hi2c);
+int MLX90614_ScanDevices(I2C_HandleTypeDef hi2c);
 
 void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, uint16_t data, uint8_t crc_in, uint8_t crc_calc);
 
