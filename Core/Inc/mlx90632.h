@@ -10,6 +10,7 @@
 
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
+#include "common.h"
 
 /* DEFAULT SLAVE ADDRESS */
 #define MLX90632_DEFAULT_SA 0x003A
@@ -58,13 +59,13 @@
 
 uint8_t CRC8_Calc(uint8_t *p, uint8_t len);
 
-int MLX90632_ScanDevices(I2C_HandleTypeDef hi2c);
 
 void MLX90632_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_HandleTypeDef hi2c);
 
-uint16_t MLX90632_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c);
+uint16_t MLX90632_ReadReg(uint8_t devAddr, uint16_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c);
+//uint16_t MLX90632_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c);
 
-float MLX90632_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c);
+float MLX90632_ReadTemp(uint8_t devAddr, I2C_HandleTypeDef hi2c);
 
 void MLX90632_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, uint16_t data, uint8_t crc_in, uint8_t crc_calc);
 

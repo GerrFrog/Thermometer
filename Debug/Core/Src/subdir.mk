@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/common.c \
 ../Core/Src/debug_mode.c \
 ../Core/Src/main.c \
 ../Core/Src/mlx90614.c \
@@ -18,6 +19,7 @@ C_SRCS += \
 ../Core/Src/system_stm32f4xx.c 
 
 OBJS += \
+./Core/Src/common.o \
 ./Core/Src/debug_mode.o \
 ./Core/Src/main.o \
 ./Core/Src/mlx90614.o \
@@ -31,6 +33,7 @@ OBJS += \
 ./Core/Src/system_stm32f4xx.o 
 
 C_DEPS += \
+./Core/Src/common.d \
 ./Core/Src/debug_mode.d \
 ./Core/Src/main.d \
 ./Core/Src/mlx90614.d \

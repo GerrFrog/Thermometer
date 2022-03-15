@@ -35,8 +35,8 @@ extern "C" {
 //#define USB_SEND
 //#define DEBUG_MODE
 //#define FLASH_MODE
-//#define MLX90632
-#define MLX90614
+#define MLX90632
+//#define MLX90614
 #define SSD1306_DISPLAY
 
 #ifdef SSD1306_DISPLAY

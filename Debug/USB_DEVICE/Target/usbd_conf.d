@@ -31,7 +31,8 @@ USB_DEVICE/Target/usbd_conf.o: ../USB_DEVICE/Target/usbd_conf.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  ../USB_DEVICE/Target/usbd_conf.h ../Core/Inc/main.h \
- ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h ../Core/Inc/mlx90614.h \
+ ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h ../Core/Inc/mlx90632.h \
+ ../Core/Inc/common.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
@@ -110,7 +111,9 @@ USB_DEVICE/Target/usbd_conf.o: ../USB_DEVICE/Target/usbd_conf.c \
 
 ../Core/Inc/ssd1306_fonts.h:
 
-../Core/Inc/mlx90614.h:
+../Core/Inc/mlx90632.h:
+
+../Core/Inc/common.h:
 
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 

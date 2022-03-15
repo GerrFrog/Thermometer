@@ -71,31 +71,33 @@ static void MX_I2C3_Init(void);
  * @param arr Pointer to output array
  * @return void
  */
-void float_temp_to_char_temp(double digit, char* arr)
-{
-	if (digit <= 10.0)
+#if defined(MLX90614) || defined(MLX90632)
+	void float_temp_to_char_temp(double digit, char* arr)
 	{
-		arr[0] = 'l';
-		arr[1] = 'e';
-		arr[2] = 's';
-		arr[3] = 's';
-		arr[4] = '\0';
+//		if (digit <= 10.0)
+//		{
+//			arr[0] = 'l';
+//			arr[1] = 'e';
+//			arr[2] = 's';
+//			arr[3] = 's';
+//			arr[4] = '\0';
+//			arr[5] = '\0';
+//			return;
+//		}
+		int l_digit = digit * 100.0;
+		arr[7] = '\0';
+		arr[6] = '\0';
 		arr[5] = '\0';
-		return;
+		arr[4] = l_digit % 10 + '0';
+		l_digit /= 10;
+		arr[3] = l_digit % 10 + '0';
+		l_digit /= 10;
+		arr[2] = ',';
+		arr[1] = l_digit % 10 + '0';
+		l_digit /= 10;
+		arr[0] = l_digit % 10 + '0';
 	}
-	int l_digit = digit * 100.0;
-	arr[7] = '\0';
-	arr[6] = '\0';
-	arr[5] = '\0';
-	arr[4] = l_digit % 10 + '0';
-	l_digit /= 10;
-	arr[3] = l_digit % 10 + '0';
-	l_digit /= 10;
-	arr[2] = ',';
-	arr[1] = l_digit % 10 + '0';
-	l_digit /= 10;
-	arr[0] = l_digit % 10 + '0';
-}
+#endif
 /* USER CODE END 0 */
 
 /**
@@ -140,15 +142,6 @@ int main(void)
    *
    *
    */
-  int mlx_addr_1;
-  int mlx_addr_2;
-
-  float float_temp_1 = 0.0;
-  float float_temp_2 = 0.0;
-
-  char char_temp_1[8];
-  char char_temp_2[8];
-
 #ifdef USB_SEND
   uint8_t *message_1 = "Temperature from 1st Sensor: \0";
   uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
@@ -160,7 +153,6 @@ int main(void)
   // Initialize Display
 #ifdef SSD1306_DISPLAY
   {
-	  char initializing_status[] = "initialize";
 	  if (SSD1306_Init(hi2c3) != 1)
 	  {
 		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
@@ -169,16 +161,20 @@ int main(void)
 	  }
 
 	  SSD1306_GotoXY (0,0);
-	  SSD1306_Puts (initializing_status, &Font_11x18, 1);
+	  SSD1306_Puts ("initialize", &Font_11x18, 1);
 	  SSD1306_UpdateScreen();
   }
 #endif
 
-#ifdef MLX90614
-  mlx_addr_1 = MLX90614_ScanDevices(hi2c1);
-  mlx_addr_2 = MLX90614_ScanDevices(hi2c2);
-#elif defined(MLX90632)
+#if defined(MLX90614) || defined(MLX90632)
+  int mlx_addr_1 = ScanDevices(hi2c1);
+  int mlx_addr_2 = ScanDevices(hi2c2);
 
+  float float_temp_1 = 0.0;
+  float float_temp_2 = 0.0;
+
+  char char_temp_1[8];
+  char char_temp_2[8];
 #endif
 
 #ifdef SSD1306_DISPLAY
@@ -292,11 +288,18 @@ int main(void)
 #if defined(MLX90614)
 	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, MLX90614_TOBJ1, hi2c1);
 	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
-#elif defined(MLX90632)
 
-#endif
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 	float_temp_to_char_temp(float_temp_2, char_temp_2);
+#elif defined(MLX90632)
+//	float_temp_1 = MLX90632_ReadTemp(mlx_addr_1, hi2c1);
+	float_temp_1 = MLX90632_ReadReg(MLX90632_DEFAULT_SA, MLX90632_RAM_6, MLX90632_DBG_OFF, hi2c1);
+	float_temp_2 = MLX90632_ReadTemp(mlx_addr_2, hi2c2);
+
+	float_temp_to_char_temp(float_temp_1, char_temp_1);
+	float_temp_to_char_temp(float_temp_2, char_temp_2);
+#endif
+
 
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
 	{
