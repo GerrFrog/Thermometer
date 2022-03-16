@@ -185,102 +185,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-#ifdef FLASH_MODE
-  {
-	  MLX90614_WriteReg(mlx_addr_1, MLX90614_EMISSIVITY, (uint16_t)0xF332, hi2c1);
-	  while(1)
-	  {
-		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+#ifdef MLX90614_FLASH_MODE
+    mlx90614_flash(mlx_addr_1, MLX90614_EMISSIVITY, 0xF332, hi2c1);
+#elif defined(MLX90632_FLASH_MODE)
 
-		  HAL_Delay(100);
-	  }
-  }
 #endif
 
-#ifdef DEBUG_MODE
-  {
-	  char debug_status[] = "Debug mode";
-
-	  SSD1306_GotoXY (0,0);
-	  SSD1306_Puts (debug_status, &Font_11x18, 1);
-	  SSD1306_UpdateScreen();
-	  HAL_Delay(1000);
-	  SSD1306_Clear();
-
-	  // To max
-	  char char_to_max[6];
-	  int int_to_max = MLX90614_ReadReg(mlx_addr_1, MLX90614_TOMAX, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_to_max, char_to_max);
-
-	  // To min
-	  char char_to_min[6];
-	  int int_to_min = MLX90614_ReadReg(mlx_addr_1, MLX90614_TOMIN, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_to_min, char_to_min);
-
-	  // PWM Configuration register
-	  char char_pwm_reg[6];
-	  int int_pwm_reg = MLX90614_ReadReg(mlx_addr_1, MLX90614_PWMCTRL, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_pwm_reg, char_pwm_reg);
-
-	  // Ta Range
-	  char char_ta_range[6];
-	  int int_ta_range = MLX90614_ReadReg(mlx_addr_1, MLX90614_TARANGE, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_ta_range, char_ta_range);
-
-	  // Emissivity
-//	  char char_emissivity[7];
-//	  float emissivity = MLX90614_ReadReg(mlx_addr_1, MLX90614_EMISSIVITY, MLX90614_DBG_OFF, hi2c1) / 65535; // max 65535
-//	  int_emissivity_to_char_emissivity(emissivity, char_emissivity);
-	  char char_emissivity[6];
-	  int emissivity = MLX90614_ReadReg(mlx_addr_1, MLX90614_EMISSIVITY, MLX90614_DBG_OFF, hi2c1); // max 65535
-	  int_address_to_char_address(emissivity, char_emissivity);
-
-	  // Configutation register
-	  char char_conf_reg[7];
-	  int int_conf_reg = MLX90614_ReadReg(mlx_addr_1, MLX90614_CFG1, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_conf_reg, char_conf_reg);
-
-	  // Slave address
-	  char char_slave_address[6];
-	  int int_slave_address = MLX90614_ReadReg(mlx_addr_1, MLX90614_SA, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_slave_address, char_slave_address);
-
-	  // ID1 Reg
-	  char char_id1[6];
-	  int int_id1 = MLX90614_ReadReg(mlx_addr_1, MLX90614_ID1, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_id1, char_id1);
-
-	  // ID2 Reg
-	  char char_id2[6];
-	  int int_id2 = MLX90614_ReadReg(mlx_addr_1, MLX90614_ID2, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_id2, char_id2);
-
-	  // ID3 Reg
-	  char char_id3[6];
-	  int int_id3 = MLX90614_ReadReg(mlx_addr_1, MLX90614_ID3, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_id3, char_id3);
-
-	  // ID4 Reg
-	  char char_id4[6];
-	  int int_id4 = MLX90614_ReadReg(mlx_addr_1, MLX90614_ID4, MLX90614_DBG_OFF, hi2c1);
-	  int_address_to_char_address(int_id4, char_id4);
-
-	  while(1)
-	  {
-		  display_output(TO_MAX_STATUS, char_to_max, 1);
-		  display_output(TO_MIN_STATUS, char_to_min, 1);
-		  display_output(PWM_CF_REG_STATUS, char_pwm_reg, 1);
-		  display_output(TA_RANGE_STATUS, char_ta_range, 1);
-		  display_output(EMISSIVITY_STATUS, char_emissivity, 0);
-		  display_output(CONFIG_REGISTER_STATUS, char_conf_reg, 1);
-		  display_output(SLAVE_ADDRESS_STATUS, char_slave_address, 1);
-		  display_output(ID1_STATUS, char_id1, 1);
-		  display_output(ID2_STATUS, char_id2, 1);
-		  display_output(ID3_STATUS, char_id3, 1);
-		  display_output(ID4_STATUS, char_id4, 1);
-	  }
-  }
-
+#if defined(MLX90614_DEBUG_MODE)
+    mlx90614_start_debugging(mlx_addr_1, hi2c1);
+#elif defined(MLX90632_DEBUG_MODE)
+    mlx90632_start_debugging(mlx_addr_1, hi2c1);
 #endif
 
   while (1)

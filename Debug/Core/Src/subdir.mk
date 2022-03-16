@@ -6,10 +6,12 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/common.c \
-../Core/Src/debug_mode.c \
 ../Core/Src/main.c \
 ../Core/Src/mlx90614.c \
+../Core/Src/mlx90614_debug_mode.c \
+../Core/Src/mlx90614_flash.c \
 ../Core/Src/mlx90632.c \
+../Core/Src/mlx90632_debug_mode.c \
 ../Core/Src/ssd1306.c \
 ../Core/Src/ssd1306_fonts.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
@@ -20,10 +22,12 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/common.o \
-./Core/Src/debug_mode.o \
 ./Core/Src/main.o \
 ./Core/Src/mlx90614.o \
+./Core/Src/mlx90614_debug_mode.o \
+./Core/Src/mlx90614_flash.o \
 ./Core/Src/mlx90632.o \
+./Core/Src/mlx90632_debug_mode.o \
 ./Core/Src/ssd1306.o \
 ./Core/Src/ssd1306_fonts.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
@@ -34,10 +38,12 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/common.d \
-./Core/Src/debug_mode.d \
 ./Core/Src/main.d \
 ./Core/Src/mlx90614.d \
+./Core/Src/mlx90614_debug_mode.d \
+./Core/Src/mlx90614_flash.d \
 ./Core/Src/mlx90632.d \
+./Core/Src/mlx90632_debug_mode.d \
 ./Core/Src/ssd1306.d \
 ./Core/Src/ssd1306_fonts.d \
 ./Core/Src/stm32f4xx_hal_msp.d \

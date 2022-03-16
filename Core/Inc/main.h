@@ -32,19 +32,23 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#define USB_SEND
-//#define DEBUG_MODE
-//#define FLASH_MODE
-#define MLX90632
-//#define MLX90614
 #define SSD1306_DISPLAY
+// #define USB_SEND
+// #define MLX90614
+#define MLX90632
+// #define MLX90614_DEBUG_MODE
+// #define MLX90632_DEBUG_MODE
+// #define MLX90614_FLASH_MODE
+// #define MLX90632_FLASH_MODE
 
 #ifdef SSD1306_DISPLAY
 	#include "ssd1306.h"
 #endif
 
-#ifdef DEBUG_MODE
-	#include "debug_mode.h"
+#if defined(MLX90614_DEBUG_MODE)
+	#include <mlx90614_debug_mode.h>
+#elif defined(MLX90632_DEBUG_MODE)
+	#include "mlx90632_debug_mode.h"
 #endif
 
 #if defined(MLX90614)

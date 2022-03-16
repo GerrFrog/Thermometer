@@ -1,0 +1,4 @@
+mlx90614_debug_mode.c:19:6:int_emissivity_to_char_emissivity	16	static
+mlx90614_debug_mode.c:41:6:int_address_to_char_address	16	static
+mlx90614_debug_mode.c:62:6:display_output	24	static
+mlx90614_debug_mode.c:91:6:mlx90614_start_debugging	248	static

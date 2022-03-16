@@ -1,4 +1,4 @@
-Core/Src/debug_mode.o: ../Core/Src/debug_mode.c ../Core/Inc/debug_mode.h \
+Core/Src/mlx90614_debug_mode.o: ../Core/Src/mlx90614_debug_mode.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -29,9 +29,9 @@ Core/Src/debug_mode.o: ../Core/Src/debug_mode.c ../Core/Inc/debug_mode.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
- ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h
-
-../Core/Inc/debug_mode.h:
+ ../Core/Inc/mlx90614_debug_mode.h ../Core/Inc/ssd1306.h \
+ ../Core/Inc/ssd1306_fonts.h ../Core/Inc/mlx90614.h ../Core/Inc/common.h \
+ ../Core/Inc/ssd1306.h
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 
@@ -93,6 +93,14 @@ Core/Src/debug_mode.o: ../Core/Src/debug_mode.c ../Core/Inc/debug_mode.h \
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h:
 
+../Core/Inc/mlx90614_debug_mode.h:
+
 ../Core/Inc/ssd1306.h:
 
 ../Core/Inc/ssd1306_fonts.h:
+
+../Core/Inc/mlx90614.h:
+
+../Core/Inc/common.h:
+
+../Core/Inc/ssd1306.h:

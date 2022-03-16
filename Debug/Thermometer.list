@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  00020188  2**0
                   CONTENTS, READONLY
- 13 .debug_info   0001f82e  00000000  00000000  000201b8  2**0
+ 13 .debug_info   0001e794  00000000  00000000  000201b8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00003e91  00000000  00000000  0003f9e6  2**0
+ 14 .debug_abbrev 00003c5e  00000000  00000000  0003e94c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00000f78  00000000  00000000  00043878  2**3
+ 15 .debug_aranges 00000f48  00000000  00000000  000425b0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_ranges 00000e08  00000000  00000000  000447f0  2**3
+ 16 .debug_ranges 00000de8  00000000  00000000  000434f8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000249ee  00000000  00000000  000455f8  2**0
+ 17 .debug_macro  0002468a  00000000  00000000  000442e0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0001612b  00000000  00000000  00069fe6  2**0
+ 18 .debug_line   000157ac  00000000  00000000  0006896a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000c74e0  00000000  00000000  00080111  2**0
+ 19 .debug_str    000c7317  00000000  00000000  0007e116  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000053  00000000  00000000  001475f1  2**0
+ 20 .comment      00000053  00000000  00000000  0014542d  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00004004  00000000  00000000  00147644  2**2
+ 21 .debug_frame  00003f80  00000000  00000000  00145480  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1338,12 +1338,12 @@ int main(void)
 	float_temp_1 = MLX90632_ReadReg(MLX90632_DEFAULT_SA, MLX90632_RAM_6, MLX90632_DBG_OFF, hi2c1);
  8000e14:	e78b      	b.n	8000d2e <main+0xb6>
  8000e16:	bf00      	nop
- 8000e18:	20000820 	.word	0x20000820
+ 8000e18:	200007cc 	.word	0x200007cc
  8000e1c:	40020c00 	.word	0x40020c00
  8000e20:	20000000 	.word	0x20000000
  8000e24:	08008b88 	.word	0x08008b88
- 8000e28:	20000874 	.word	0x20000874
- 8000e2c:	200008c8 	.word	0x200008c8
+ 8000e28:	20000820 	.word	0x20000820
+ 8000e2c:	20000874 	.word	0x20000874
  8000e30:	40020000 	.word	0x40020000
 
 08000e34 <SystemClock_Config>:
@@ -1547,7 +1547,7 @@ static void MX_I2C1_Init(void)
 }
  8000f50:	bf00      	nop
  8000f52:	bd80      	pop	{r7, pc}
- 8000f54:	20000874 	.word	0x20000874
+ 8000f54:	20000820 	.word	0x20000820
  8000f58:	40005400 	.word	0x40005400
  8000f5c:	000186a0 	.word	0x000186a0
 
@@ -1618,7 +1618,7 @@ static void MX_I2C2_Init(void)
 }
  8000fac:	bf00      	nop
  8000fae:	bd80      	pop	{r7, pc}
- 8000fb0:	200008c8 	.word	0x200008c8
+ 8000fb0:	20000874 	.word	0x20000874
  8000fb4:	40005800 	.word	0x40005800
  8000fb8:	000186a0 	.word	0x000186a0
 
@@ -1689,7 +1689,7 @@ static void MX_I2C3_Init(void)
 }
  8001008:	bf00      	nop
  800100a:	bd80      	pop	{r7, pc}
- 800100c:	20000820 	.word	0x20000820
+ 800100c:	200007cc 	.word	0x200007cc
  8001010:	40005c00 	.word	0x40005c00
  8001014:	00061a80 	.word	0x00061a80
 
@@ -1855,10 +1855,10 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8001118:	e7fe      	b.n	8001118 <Error_Handler+0x8>
 
 0800111a <MLX90632_ReadReg>:
-	HAL_Delay(10);
-	MLX90632_SendDebugMsg(MLX90632_DBG_MSG_W, devAddr, i2cdata[0], data, i2cdata[3], 0x00);
-}
-
+ * @param dbg_lvl Debug level
+ * @param hi2c Handler of I2C
+ * @return uint16_t Register data
+ */
 uint16_t MLX90632_ReadReg(uint8_t devAddr, uint16_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c)
 {
  800111a:	b082      	sub	sp, #8
@@ -2007,7 +2007,7 @@ uint8_t SSD1306_Init(I2C_HandleTypeDef hi2c_init) {
  800120c:	607b      	str	r3, [r7, #4]
 	while(p>0)
  800120e:	e004      	b.n	800121a <SSD1306_Init+0x4e>
- 8001210:	200007cc 	.word	0x200007cc
+ 8001210:	20000908 	.word	0x20000908
 		p--;
  8001214:	687b      	ldr	r3, [r7, #4]
  8001216:	3b01      	subs	r3, #1
@@ -2389,7 +2389,7 @@ uint8_t SSD1306_Init(I2C_HandleTypeDef hi2c_init) {
  80015a2:	232e      	movs	r3, #46	; 0x2e
  80015a4:	e002      	b.n	80015ac <SSD1306_Init+0x3e0>
  80015a6:	bf00      	nop
- 80015a8:	200007cc 	.word	0x200007cc
+ 80015a8:	20000908 	.word	0x20000908
  80015ac:	9313      	str	r3, [sp, #76]	; 0x4c
  80015ae:	4668      	mov	r0, sp
  80015b0:	f104 0308 	add.w	r3, r4, #8
@@ -2516,7 +2516,7 @@ void SSD1306_UpdateScreen(void) {
  800168a:	370c      	adds	r7, #12
  800168c:	46bd      	mov	sp, r7
  800168e:	bd90      	pop	{r4, r7, pc}
- 8001690:	200007cc 	.word	0x200007cc
+ 8001690:	20000908 	.word	0x20000908
  8001694:	200001a4 	.word	0x200001a4
 
 08001698 <SSD1306_Fill>:
@@ -3033,7 +3033,7 @@ void ssd1306_I2C_WriteMulti(uint8_t address, uint8_t reg, uint8_t* data, uint16_
  80019c2:	46bd      	mov	sp, r7
  80019c4:	bd90      	pop	{r4, r7, pc}
  80019c6:	bf00      	nop
- 80019c8:	200007cc 	.word	0x200007cc
+ 80019c8:	20000908 	.word	0x20000908
 
 080019cc <ssd1306_I2C_Write>:
 
@@ -20991,7 +20991,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
  8008284:	bd80      	pop	{r7, pc}
  8008286:	bf00      	nop
  8008288:	20000960 	.word	0x20000960
- 800828c:	2000091c 	.word	0x2000091c
+ 800828c:	200008c8 	.word	0x200008c8
 
 08008290 <CDC_TransmitCplt_FS>:
   * @param  Buf: Buffer of data to be received

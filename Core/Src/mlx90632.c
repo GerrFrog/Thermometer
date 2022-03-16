@@ -50,6 +50,15 @@ void MLX90632_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_Hand
 	MLX90632_SendDebugMsg(MLX90632_DBG_MSG_W, devAddr, i2cdata[0], data, i2cdata[3], 0x00);
 }
 
+/**
+ * @brief Read data from register
+ *
+ * @param devAddr Device address
+ * @param regAddr Register address
+ * @param dbg_lvl Debug level
+ * @param hi2c Handler of I2C
+ * @return uint16_t Register data
+ */
 uint16_t MLX90632_ReadReg(uint8_t devAddr, uint16_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c)
 {
 	uint8_t data[2];
@@ -61,42 +70,6 @@ uint16_t MLX90632_ReadReg(uint8_t devAddr, uint16_t regAddr, uint8_t dbg_lvl, I2
 
 	return ret;
 }
-
-/**
- * @brief Read data from register
- *
- * @param devAddr Device address
- * @param regAddr Register address
- * @param dbg_lvl Debug level
- * @param hi2c Handler of I2C
- * @return uint16_t Register data
- */
-//uint16_t MLX90632_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c)
-//{
-//	uint16_t data;
-//	uint8_t in_buff[3], crc_buff[5], crc;
-//
-//	HAL_I2C_Mem_Read(&hi2c, (devAddr<<1), regAddr, 1, in_buff, 3, 100);
-//
-//	// For a read word command, in the crc8 calculus, you have to include [SA_W, Command, SA_R, LSB, MSB]
-//	crc_buff[0] = (devAddr<<1);
-//	crc_buff[1] = regAddr;
-//	crc_buff[2] = (devAddr<<1) + 1;
-//	crc_buff[3] = in_buff[0];
-//	crc_buff[4] = in_buff[1];
-//	crc = CRC8_Calc(crc_buff, 5);
-//
-//	data = (in_buff[1] <<8 | in_buff[0]);
-//
-//	//TODO: implement CRC8 check on data received
-//	if (crc != in_buff[2]) {
-//		data = 0x0000;
-//	}
-//	if(dbg_lvl == MLX90632_DBG_ON)	MLX90632_SendDebugMsg(MLX90632_DBG_MSG_R, devAddr, regAddr, data, in_buff[2], crc);
-//
-//	HAL_Delay(1);
-//	return data;
-//}
 
 /**
  * @brief Read temperature from sensor
