@@ -6,6 +6,14 @@
  */
 #include "mlx90614_flash.h"
 
+/**
+ * @brief Flash the value to MLX90614
+ *
+ * @param mlx_addr I2C address of MLX sensor
+ * @param mem_addr Memory to be flashed
+ * @param value Value to flash to memory
+ * @param hi2c I2C handler
+ */
 void mlx90614_flash(uint16_t mlx_addr, uint16_t mem_addr, uint16_t value, I2C_HandleTypeDef hi2c)
 {
 	  MLX90614_WriteReg(mlx_addr, mem_addr, value, hi2c);

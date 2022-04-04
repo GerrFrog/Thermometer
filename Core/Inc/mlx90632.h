@@ -8,9 +8,9 @@
 #ifndef INC_MLX90632_H_
 #define INC_MLX90632_H_
 
+#include <mlx_common.h>
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
-#include "common.h"
 
 /* DEFAULT SLAVE ADDRESS */
 #define MLX90632_DEFAULT_SA 0x003A

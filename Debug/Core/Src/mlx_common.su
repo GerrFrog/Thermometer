@@ -1,0 +1,2 @@
+mlx_common.c:18:9:CRC8_Calc	24	static
+mlx_common.c:36:5:ScanDevices	16	static

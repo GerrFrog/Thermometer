@@ -5,8 +5,8 @@
  *      Author: falls
  */
 
-#ifndef INC_COMMON_H_
-#define INC_COMMON_H_
+#ifndef INC_MLX_COMMON_H_
+#define INC_MLX_COMMON_H_
 
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
@@ -42,4 +42,4 @@ int ScanDevices(I2C_HandleTypeDef hi2c);
 
 
 
-#endif /* INC_COMMON_H_ */
+#endif /* INC_MLX_COMMON_H_ */

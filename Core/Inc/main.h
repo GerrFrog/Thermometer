@@ -37,7 +37,7 @@ extern "C" {
 // #define MLX90614
 #define MLX90632
 // #define MLX90614_DEBUG_MODE
-// #define MLX90632_DEBUG_MODE
+ #define MLX90632_DEBUG_MODE
 // #define MLX90614_FLASH_MODE
 // #define MLX90632_FLASH_MODE
 

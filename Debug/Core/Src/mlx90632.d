@@ -1,4 +1,5 @@
 Core/Src/mlx90632.o: ../Core/Src/mlx90632.c ../Core/Inc/mlx90632.h \
+ ../Core/Inc/mlx_common.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -28,10 +29,11 @@ Core/Src/mlx90632.o: ../Core/Src/mlx90632.c ../Core/Inc/mlx90632.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
- ../Core/Inc/common.h
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h
 
 ../Core/Inc/mlx90632.h:
+
+../Core/Inc/mlx_common.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 
@@ -92,5 +94,3 @@ Core/Src/mlx90632.o: ../Core/Src/mlx90632.c ../Core/Inc/mlx90632.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h:
-
-../Core/Inc/common.h:

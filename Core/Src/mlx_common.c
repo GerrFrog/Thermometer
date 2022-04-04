@@ -4,7 +4,7 @@
  *  Created on: Mar 14, 2022
  *      Author: falls
  */
-#include "common.h"
+#include <mlx_common.h>
 
 /**
  * @brief Calculate Cyclic-Redundecy-Check (CRC8)
