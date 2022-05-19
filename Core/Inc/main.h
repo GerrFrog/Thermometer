@@ -34,27 +34,28 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #define SSD1306_DISPLAY
 // #define USB_SEND
-// #define MLX90614
-#define MLX90632
+ #define MLX90614
+//#define MLX90632
 // #define MLX90614_DEBUG_MODE
- #define MLX90632_DEBUG_MODE
+// #define MLX90632_DEBUG_MODE
 // #define MLX90614_FLASH_MODE
 // #define MLX90632_FLASH_MODE
 
 #ifdef SSD1306_DISPLAY
-	#include "ssd1306.h"
+#	include "ssd1306.h"
 #endif
 
 #if defined(MLX90614_DEBUG_MODE)
-	#include <mlx90614_debug_mode.h>
+#	include <mlx90614_debug_mode.h>
 #elif defined(MLX90632_DEBUG_MODE)
-	#include "mlx90632_debug_mode.h"
+#	include "mlx90632_debug_mode.h"
 #endif
 
 #if defined(MLX90614)
-	#include "mlx90614.h"
+#	include "mlx90614.h"
 #elif defined(MLX90632)
-	#include "mlx90632.h"
+#	include "mlx90632.h"
+#	include "mlx90632_depends.h"
 #endif
 
 

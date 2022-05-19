@@ -11,6 +11,8 @@ C_SRCS += \
 ../Core/Src/mlx90614_flash.c \
 ../Core/Src/mlx90632.c \
 ../Core/Src/mlx90632_debug_mode.c \
+../Core/Src/mlx90632_depends.c \
+../Core/Src/mlx90632_extended_meas.c \
 ../Core/Src/mlx_common.c \
 ../Core/Src/mlx_debug_common.c \
 ../Core/Src/ssd1306.c \
@@ -28,6 +30,8 @@ OBJS += \
 ./Core/Src/mlx90614_flash.o \
 ./Core/Src/mlx90632.o \
 ./Core/Src/mlx90632_debug_mode.o \
+./Core/Src/mlx90632_depends.o \
+./Core/Src/mlx90632_extended_meas.o \
 ./Core/Src/mlx_common.o \
 ./Core/Src/mlx_debug_common.o \
 ./Core/Src/ssd1306.o \
@@ -45,6 +49,8 @@ C_DEPS += \
 ./Core/Src/mlx90614_flash.d \
 ./Core/Src/mlx90632.d \
 ./Core/Src/mlx90632_debug_mode.d \
+./Core/Src/mlx90632_depends.d \
+./Core/Src/mlx90632_extended_meas.d \
 ./Core/Src/mlx_common.d \
 ./Core/Src/mlx_debug_common.d \
 ./Core/Src/ssd1306.d \

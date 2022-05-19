@@ -130,3 +130,31 @@ void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, ui
 		// TODO: Do something if error
 	}
 }
+
+/**
+ * @brief Temperatur compensation for value
+ * 
+ * @note https://arachnoid.com/polysolve/
+ *
+ * @param x Value
+ * @return double
+ */
+double MLX90614_temp_compensation(double x)
+{
+	double terms[] = {
+		4.5285558056644653e+001,
+		-7.7381865153331808e-001,
+		1.4986086918853544e-002
+	};
+
+	size_t csz = sizeof terms / sizeof *terms;
+
+	double t = 1;
+	double r = 0;
+	for (int i = 0; i < csz;i++)
+	{
+		r += terms[i] * t;
+		t *= x;
+	}
+	return r;
+}

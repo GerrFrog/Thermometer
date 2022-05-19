@@ -53,4 +53,6 @@ float MLX90614_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c
 
 void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, uint16_t data, uint8_t crc_in, uint8_t crc_calc);
 
+double MLX90614_temp_compensation(double x);
+
 #endif

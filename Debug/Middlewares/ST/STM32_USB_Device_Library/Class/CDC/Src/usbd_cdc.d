@@ -34,8 +34,7 @@ Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
- ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h \
- ../Core/Inc/mlx90632_debug_mode.h ../Core/Inc/mlx90632.h \
+ ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h ../Core/Inc/mlx90614.h \
  ../Core/Inc/mlx_common.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
@@ -116,9 +115,7 @@ Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o: \
 
 ../Core/Inc/ssd1306_fonts.h:
 
-../Core/Inc/mlx90632_debug_mode.h:
-
-../Core/Inc/mlx90632.h:
+../Core/Inc/mlx90614.h:
 
 ../Core/Inc/mlx_common.h:
 

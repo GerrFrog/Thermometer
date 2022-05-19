@@ -4,6 +4,8 @@
 "./Core/Src/mlx90614_flash.o"
 "./Core/Src/mlx90632.o"
 "./Core/Src/mlx90632_debug_mode.o"
+"./Core/Src/mlx90632_depends.o"
+"./Core/Src/mlx90632_extended_meas.o"
 "./Core/Src/mlx_common.o"
 "./Core/Src/mlx_debug_common.o"
 "./Core/Src/ssd1306.o"

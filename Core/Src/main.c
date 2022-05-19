@@ -24,8 +24,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #ifdef USB_SEND
-	#include "usb_device.h"
-	#include "usbd_cdc_if.h"
+#	include "usb_device.h"
+#	include "usbd_cdc_if.h"
 #endif
 /* USER CODE END Includes */
 
@@ -201,31 +201,31 @@ int main(void)
   {
 #if defined(MLX90614)
 	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, MLX90614_TOBJ1, hi2c1);
+	float_temp_1 = MLX90614_temp_compensation(float_temp_1);
 	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
 
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 	float_temp_to_char_temp(float_temp_2, char_temp_2);
 #elif defined(MLX90632)
-//	float_temp_1 = MLX90632_ReadTemp(mlx_addr_1, hi2c1);
-	float_temp_1 = MLX90632_ReadReg(MLX90632_DEFAULT_SA, MLX90632_RAM_6, MLX90632_DBG_OFF, hi2c1);
-	float_temp_2 = MLX90632_ReadTemp(mlx_addr_2, hi2c2);
-
-	float_temp_to_char_temp(float_temp_1, char_temp_1);
-	float_temp_to_char_temp(float_temp_2, char_temp_2);
+//	float_temp_1 = MLX90632_ReadReg(MLX90632_DEFAULT_SA, MLX90632_RAM_6, MLX90632_DBG_OFF, hi2c1);
+//	float_temp_2 = MLX90632_ReadTemp(mlx_addr_2, hi2c2);
+//
+//	float_temp_to_char_temp(float_temp_1, char_temp_1);
+//	float_temp_to_char_temp(float_temp_2, char_temp_2);
 #endif
 
 
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
 	{
-#ifdef SSD1306_DISPLAY
+#	ifdef SSD1306_DISPLAY
 		SSD1306_GotoXY(0, 0);
 		SSD1306_Puts(char_temp_1, &Font_11x18, 1);
 
 		SSD1306_GotoXY(70, 0);
 		SSD1306_Puts(char_temp_2, &Font_11x18, 1);
-#endif
+#	endif
 
-#ifdef USB_SEND
+#		ifdef USB_SEND
 		{
 			CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
 			CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
@@ -235,7 +235,7 @@ int main(void)
 			CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
 			CDC_Transmit_FS(end, strlen(end));
 		}
-#endif
+#		endif
 	}
 
 #ifdef SSD1306_DISPLAY
@@ -248,7 +248,7 @@ int main(void)
 	SSD1306_UpdateScreen();
 #endif
 
-#ifdef USB_SEND
+#	ifdef USB_SEND
 	{
 		CDC_Transmit_FS(message_1, strlen(message_1));
 		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
@@ -258,7 +258,7 @@ int main(void)
 		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
 		CDC_Transmit_FS(end, strlen(end));
 	}
-#endif
+#	endif
 
 	HAL_Delay(100);
     /* USER CODE END WHILE */
