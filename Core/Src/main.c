@@ -353,7 +353,7 @@ int main(void)
 	ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, PT, PR, PG, PO, Gb);
 	object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 
-	float_temp_1 = ambient;
+	float_temp_1 = object;
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 #endif
 

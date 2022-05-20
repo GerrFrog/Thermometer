@@ -1902,8 +1902,8 @@ int main(void)
  800140c:	4603      	mov	r3, r0
  800140e:	647b      	str	r3, [r7, #68]	; 0x44
 
-	float_temp_1 = ambient;
- 8001410:	6cbb      	ldr	r3, [r7, #72]	; 0x48
+	float_temp_1 = object;
+ 8001410:	6c7b      	ldr	r3, [r7, #68]	; 0x44
  8001412:	65bb      	str	r3, [r7, #88]	; 0x58
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
  8001414:	6db8      	ldr	r0, [r7, #88]	; 0x58
