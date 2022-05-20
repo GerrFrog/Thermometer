@@ -29,26 +29,43 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "common.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define SSD1306_DISPLAY
-// #define USB_SEND
- #define MLX90614
-//#define MLX90632
-// #define MLX90614_DEBUG_MODE
-// #define MLX90632_DEBUG_MODE
-// #define MLX90614_FLASH_MODE
-// #define MLX90632_FLASH_MODE
+
+/* If SSD1306 display is on */
+#define SSD1306_DISPLAY 
+
+/* If MLX90614 termometer is on */
+// #define MLX90614
+
+/* If MLX90632 termometer is on */
+#define MLX90632
+
+/* If program runs as debug for MLX90614 */
+// #define MLX90614_DEBUG_MODE 
+
+/* If program runs as debug for MLX90632 */
+// #define MLX90632_DEBUG_MODE 
+
+/* If program runs as flash for MLX90614 */
+// #define MLX90614_FLASH_MODE 
+
+/* If program runs as flash for MLX90632 */
+// #define MLX90632_FLASH_MODE 
+
+/* If temperature has to be send to USB port */
+// #define USB_SEND 
 
 #ifdef SSD1306_DISPLAY
-#	include "ssd1306.h"
+#   include "ssd1306.h"
 #endif
 
 #if defined(MLX90614_DEBUG_MODE)
-#	include <mlx90614_debug_mode.h>
+#	include <mlx90614_debug.h>
 #elif defined(MLX90632_DEBUG_MODE)
-#	include "mlx90632_debug_mode.h"
+#	include <mlx90632_debug.h>
 #endif
 
 #if defined(MLX90614)

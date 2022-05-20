@@ -4,7 +4,7 @@
  *  Created on: Mar 16, 2022
  *      Author: falls
  */
-#include "mlx90632_debug_mode.h"
+#include <mlx90632_debug.h>
 
 void mlx90632_start_debugging(int mlx_addr, I2C_HandleTypeDef hi2c)
 {
@@ -15,6 +15,4 @@ void mlx90632_start_debugging(int mlx_addr, I2C_HandleTypeDef hi2c)
 	  SSD1306_UpdateScreen();
 	  HAL_Delay(1000);
 	  SSD1306_Clear();
-
-
 }

@@ -136,7 +136,6 @@ int32_t mlx90632_get_meas_type(I2C_HandleTypeDef hi2c);
 #ifdef TEST
 int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw, I2C_HandleTypeDef hi2c);
 int32_t mlx90632_read_temp_object_raw_extended(int16_t *object_new_raw, I2C_HandleTypeDef hi2c);
-
 #endif
 
 #endif /* INC_MLX90632_EXTENDED_MEAS_H_ */

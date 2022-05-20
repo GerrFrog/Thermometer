@@ -4,7 +4,7 @@
  *  Created on: Mar 14, 2022
  *      Author: falls
  */
-#include <mlx_common.h>
+#include <common.h>
 
 /**
  * @brief Calculate Cyclic-Redundecy-Check (CRC8)
@@ -33,12 +33,13 @@ uint8_t CRC8_Calc (uint8_t *p, uint8_t len)
  * @param hi2c Handler of I2C
  * @return int Device address
  */
-int ScanDevices(I2C_HandleTypeDef hi2c)
+uint16_t device_scanner(I2C_HandleTypeDef hi2c)
 {
 	HAL_StatusTypeDef result;
-	for (int i = 0; i<126; i++)
+	for (uint16_t i = 0; i<126; i++)
 	{
-		result = HAL_I2C_IsDeviceReady(&hi2c, (uint16_t) (i<<1), 2, 2);
+//		result = HAL_I2C_IsDeviceReady(&hi2c, (uint16_t) (i<<1), 2, 2);
+//		result = HAL_I2C_IsDeviceReady(&hi2c, 0x3000, 1, 100);
 		if (result != HAL_OK)
 		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 		if (result == HAL_OK)
@@ -49,6 +50,7 @@ int ScanDevices(I2C_HandleTypeDef hi2c)
 		  return i;
 		}
 	}
+	return 0;
 }
 
 

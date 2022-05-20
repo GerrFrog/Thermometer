@@ -5,8 +5,8 @@
  *      Author: falls
  */
 
-#ifndef INC_MLX90614_DEBUG_MODE_H_
-#define INC_MLX90614_DEBUG_MODE_H_
+#ifndef INC_MLX90614_DEBUG_H_
+#define INC_MLX90614_DEBUG_H_
 
 #include "stm32f4xx_hal.h"
 #include "ssd1306.h"
@@ -33,4 +33,4 @@ void display_output(char* message, char* char_emissivity, char hex);
 
 void mlx90614_start_debugging(int mlx_addr, I2C_HandleTypeDef hi2c);
 
-#endif /* INC_MLX90614_DEBUG_MODE_H_ */
+#endif /* INC_MLX90614_DEBUG_H_ */

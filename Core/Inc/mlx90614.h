@@ -8,7 +8,7 @@
 #ifndef INC_MLX90614_H_
 #define INC_MLX90614_H_
 
-#include <mlx_common.h>
+#include "common.h"
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
 

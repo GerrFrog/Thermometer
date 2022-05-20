@@ -14,36 +14,41 @@
 
 /* Solve errno not defined values */
 #ifndef ETIMEDOUT
-#define ETIMEDOUT 110 /**< From linux errno.h */
+#	define ETIMEDOUT 110 /**< From linux errno.h */
 #endif
+
 #ifndef EINVAL
-#define EINVAL 22 /**< From linux errno.h */
+#	define EINVAL 22 /**< From linux errno.h */
 #endif
+
 #ifndef EPROTONOSUPPORT
-#define EPROTONOSUPPORT 93 /**< From linux errno.h */
+#	define EPROTONOSUPPORT 93 /**< From linux errno.h */
 #endif
+
 #ifndef ERANGE
-#define ERANGE 34 /**< From linux errno.h */
+#	define ERANGE 34 /**< From linux errno.h */
 #endif
+
 #ifndef ENOKEY
-#define ENOKEY 126 /**< From linux errno.h */
+#	define ENOKEY 126 /**< From linux errno.h */
 #endif
 
 
 /* BIT, GENMASK and ARRAY_SIZE macros are imported from kernel */
 #ifndef BIT
-#define BIT(x)(1UL << (x))
+#	define BIT(x)(1UL << (x))
 #endif
+
 #ifndef GENMASK
-#ifndef BITS_PER_LONG
-#warning "Using default BITS_PER_LONG value"
-#define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
+#	ifndef BITS_PER_LONG
+#		warning "Using default BITS_PER_LONG value"
+#		define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
+#	endif
+#	define GENMASK(h, l) (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
 #endif
-#define GENMASK(h, l) \
-    (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
-#endif
+
 #ifndef ARRAY_SIZE
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0])) /**< Return number of elements in array */
+#	define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0])) /**< Return number of elements in array */
 #endif
 
 /* Memory sections addresses */
@@ -105,10 +110,10 @@ typedef enum mlx90632_meas_e {
 #define MLX90632_REFRESH_RATE_STATUS(mlx90632_meas) (mlx90632_meas << MLX90632_EE_REFRESH_RATE_SHIFT)  /**< Extract the Refresh Rate bits */
 
 /* Register addresses - volatile */
-#define MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
+#define   MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
 
 /* Control register address - volatile */
-#define MLX90632_REG_CTRL   0x3001 /**< Control Register address */
+#define   MLX90632_REG_CTRL   0x3001 /**< Control Register address */
 #define   MLX90632_CFG_SOC_SHIFT 3 /**< Start measurement in step mode */
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
@@ -136,7 +141,7 @@ typedef enum mlx90632_meas_e {
 #define MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
 
 /* Device status register - volatile */
-#define MLX90632_REG_STATUS 0x3fff /**< Device status register */
+#define   MLX90632_REG_STATUS 0x3fff /**< Device status register */
 #define   MLX90632_STAT_BUSY    BIT(10) /**< Device busy indicator */
 #define   MLX90632_STAT_EE_BUSY BIT(9) /**< Device EEPROM busy indicator */
 #define   MLX90632_STAT_BRST    BIT(8) /**< Device brown out reset indicator */
@@ -178,8 +183,7 @@ typedef enum mlx90632_meas_e {
 /* Gets a new register value based on the old register value - only writing the value based on the desired bits
  * Masks the old register and shifts the new value in
  */
-#define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) \
-    ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
+#define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
 
 /** Read raw ambient and object temperature
  *

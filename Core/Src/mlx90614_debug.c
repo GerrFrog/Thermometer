@@ -4,8 +4,8 @@
  *  Created on: Feb 8, 2022
  *      Author: falls
  */
+#include <mlx90614_debug.h>
 #include "stm32f4xx_hal.h"
-#include "mlx90614_debug_mode.h"
 #include "mlx90614.h"
 #include "ssd1306.h"
 

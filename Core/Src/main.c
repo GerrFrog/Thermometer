@@ -166,15 +166,48 @@ int main(void)
   }
 #endif
 
-#if defined(MLX90614) || defined(MLX90632)
-  int mlx_addr_1 = ScanDevices(hi2c1);
-  int mlx_addr_2 = ScanDevices(hi2c2);
+//  HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+//
+//  if (result == HAL_OK) {
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//	  HAL_Delay(1000);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//	  HAL_Delay(1000);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//  } else {
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//	  HAL_Delay(1000);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//	  HAL_Delay(1000);
+//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//  }
+
+  uint16_t mlx_addr_1 = 0;
+  uint16_t mlx_addr_2 = 0;
 
   float float_temp_1 = 0.0;
   float float_temp_2 = 0.0;
 
   char char_temp_1[8];
   char char_temp_2[8];
+
+#if defined(MLX90614)
+  mlx_addr_1 = device_scanner(hi2c1);
+  mlx_addr_2 = device_scanner(hi2c2);
+#elif defined(MLX90632)
+  mlx_addr_1 = 0x3a << 1;
+  mlx_addr_2 = 0x3a << 1;
+
+  float pre_ambient, pre_object, ambient, object;
+
+  int16_t ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw,
+  	  	  PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+		  Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+		  Ga = -14556410, Ha = 16384, Hb = 0, Gb = 9728, Ka = 10752;
 #endif
 
 #ifdef SSD1306_DISPLAY
@@ -207,11 +240,18 @@ int main(void)
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 	float_temp_to_char_temp(float_temp_2, char_temp_2);
 #elif defined(MLX90632)
-//	float_temp_1 = MLX90632_ReadReg(MLX90632_DEFAULT_SA, MLX90632_RAM_6, MLX90632_DBG_OFF, hi2c1);
-//	float_temp_2 = MLX90632_ReadTemp(mlx_addr_2, hi2c2);
-//
-//	float_temp_to_char_temp(float_temp_1, char_temp_1);
-//	float_temp_to_char_temp(float_temp_2, char_temp_2);
+	mlx90632_read_temp_raw(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw, hi2c1);
+
+	pre_ambient = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
+	pre_object = mlx90632_preprocess_temp_object(object_new_raw, object_old_raw, ambient_new_raw, ambient_old_raw, Ka);
+
+	mlx90632_set_emissivity(0.95);
+
+	ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, PT, PR, PG, PO, Gb);
+	object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+	float_temp_1 = object;
+	float_temp_to_char_temp(float_temp_1, char_temp_1);
 #endif
 
 

@@ -1,6 +1,5 @@
 Core/Src/mlx90614.o: ../Core/Src/mlx90614.c ../Core/Inc/mlx90614.h \
- ../Core/Inc/mlx_common.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
+ ../Core/Inc/common.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h \
@@ -33,7 +32,7 @@ Core/Src/mlx90614.o: ../Core/Src/mlx90614.c ../Core/Inc/mlx90614.h \
 
 ../Core/Inc/mlx90614.h:
 
-../Core/Inc/mlx_common.h:
+../Core/Inc/common.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 

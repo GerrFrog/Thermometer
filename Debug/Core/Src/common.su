@@ -1,2 +1,2 @@
 common.c:18:9:CRC8_Calc	24	static
-common.c:36:5:ScanDevices	16	static
+common.c:36:10:device_scanner	16	static
