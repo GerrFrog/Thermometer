@@ -98,6 +98,52 @@ static void MX_I2C3_Init(void);
 		arr[0] = l_digit % 10 + '0';
 	}
 #endif
+
+	static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *PT, int32_t *Ea, int32_t *Eb, int32_t *Fa, int32_t *Fb, int32_t *Ga, int16_t *Gb, int16_t *Ha, int16_t *Hb, int16_t *Ka, I2C_HandleTypeDef hi2c)
+	{
+		int32_t ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_P_R, (uint32_t *) PR, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_P_G, (uint32_t *) PG, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_P_O, (uint32_t *) PO, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_P_T, (uint32_t *) PT, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_Ea, (uint32_t *) Ea, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_Eb, (uint32_t *) Eb, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_Fa, (uint32_t *) Fa, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_Fb, (uint32_t *) Fb, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read32(MLX90632_EE_Ga, (uint32_t *) Ga, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read(MLX90632_EE_Gb, (uint16_t *) Gb, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read(MLX90632_EE_Ha, (uint16_t *) Ha, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read(MLX90632_EE_Hb, (uint16_t *) Hb, hi2c);
+		if(ret < 0)
+			return ret;
+		ret = mlx90632_i2c_read(MLX90632_EE_Ka, (uint16_t *) Ka, hi2c);
+		if(ret < 0)
+			return ret;
+		return 0;
+	}
+
 /* USER CODE END 0 */
 
 /**
@@ -186,6 +232,58 @@ int main(void)
 //	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 //  }
 
+
+
+//  int16_t ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw,
+//  	  	  PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+//		  Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+//		  Ga = -14556410, Ha = 16384, Hb = 0, Gb = 9728, Ka = 10752;
+//  int32_t ret = 0; /**< Variable will store return values */
+//  double ambient; /**< Ambient temperature in degrees Celsius */
+//  double object; /**< Object temperature in degrees Celsius */
+//
+//  /* Read sensor EEPROM registers needed for calcualtions */
+//
+//  /* You can check if the device supports extended measurement mode */
+//  ret = mlx90632_init(hi2c1);
+//
+//  /* Set MLX90632 in extended mode */
+//  ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
+//  if(ret < 0) {
+//  }
+//
+//  /* Now we read current ambient and object temperature */
+//  ret = mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
+//  if(ret < 0) {
+//
+//  }
+//
+//  /* Now start calculations (no more i2c accesses) */
+//  /* Calculate ambient temperature */
+//  ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
+//                                                PT, PR, PG, PO, Gb);
+//
+//  /* Get preprocessed temperatures needed for object temperature calculation */
+//  double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+//                                                                 ambient_old_raw, Gb);
+//  double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+//                                                               ambient_old_raw, Ka);
+//
+//  /* Calculate object temperature assuming the reflected temperature equals ambient*/
+//  object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+//
+//  char ch[8];
+//  float_temp_to_char_temp(object, ch);
+//
+//  SSD1306_GotoXY (0,0);
+//  SSD1306_Puts (ch, &Font_11x18, 1);
+//  SSD1306_UpdateScreen();
+//
+//  return 0;
+
+
+
+
   uint16_t mlx_addr_1 = 0;
   uint16_t mlx_addr_2 = 0;
 
@@ -204,10 +302,15 @@ int main(void)
 
   float pre_ambient, pre_object, ambient, object;
 
-  int16_t ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw,
+  int32_t
   	  	  PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
 		  Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-		  Ga = -14556410, Ha = 16384, Hb = 0, Gb = 9728, Ka = 10752;
+		  Ga = -14556410;
+  int16_t
+  	  	  Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
+		  ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
+
+  mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
 #endif
 
 #ifdef SSD1306_DISPLAY
@@ -250,7 +353,7 @@ int main(void)
 	ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, PT, PR, PG, PO, Gb);
 	object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 
-	float_temp_1 = object;
+	float_temp_1 = ambient;
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 #endif
 
@@ -300,7 +403,7 @@ int main(void)
 	}
 #	endif
 
-	HAL_Delay(100);
+	HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

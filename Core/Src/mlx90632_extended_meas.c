@@ -126,16 +126,18 @@ int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambie
             break;
     }
 
-    if (tries < 0)
-    {
-        // data not ready
-        return -ETIMEDOUT;
-    }
+//    if (tries < 0)
+//    {
+//        // data not ready
+//        return -ETIMEDOUT;
+//    }
 
     /** Read new and old **ambient** values from sensor */
     ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw, hi2c);
-    if (ret < 0)
-        return ret;
+    if (ret < 0) {
+  	  return ret;
+    }
+
 
     /** Read new **object** value from sensor */
     ret = mlx90632_read_temp_object_raw_extended(object_new_raw, hi2c);

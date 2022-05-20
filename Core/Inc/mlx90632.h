@@ -428,6 +428,8 @@ int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate, I2C_HandleTypeDef hi
  */
 mlx90632_meas_t mlx90632_get_refresh_rate(I2C_HandleTypeDef hi2c);
 
+//static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *PT, int32_t *Ea, int32_t *Eb, int32_t *Fa, int32_t *Fb, int32_t *Ga, int16_t *Gb, int16_t *Ha, int16_t *Hb, int16_t *Ka, I2C_HandleTypeDef hi2c);
+
 ///@}
 
 #ifdef TEST

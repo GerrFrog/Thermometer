@@ -30,12 +30,15 @@ int mlx90632_start_measurement(I2C_HandleTypeDef hi2c)
     uint16_t reg_status;
 
     ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status, hi2c);
-    if (ret < 0)
-        return ret;
+    if (ret < 0) {
+    	  return ret;
+    }
+
 
     ret = mlx90632_i2c_write(MLX90632_REG_STATUS, reg_status & (~MLX90632_STAT_DATA_RDY), hi2c);
-    if (ret < 0)
-        return ret;
+    if (ret < 0){
+  	  return ret;
+  }
 
     while (tries-- > 0)
     {
@@ -684,3 +687,47 @@ mlx90632_meas_t mlx90632_get_refresh_rate(I2C_HandleTypeDef hi2c)
     return (mlx90632_meas_t)MLX90632_REFRESH_RATE(meas1);
 }
 
+//static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *PT, int32_t *Ea, int32_t *Eb, int32_t *Fa, int32_t *Fb, int32_t *Ga, int16_t *Gb, int16_t *Ha, int16_t *Hb, int16_t *Ka, I2C_HandleTypeDef hi2c)
+//{
+//	int32_t ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_P_R, (uint32_t *) PR, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_P_G, (uint32_t *) PG, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_P_O, (uint32_t *) PO, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_P_T, (uint32_t *) PT, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_Ea, (uint32_t *) Ea, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_Eb, (uint32_t *) Eb, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_Fa, (uint32_t *) Fa, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_Fb, (uint32_t *) Fb, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read32(MLX90632_EE_Ga, (uint32_t *) Ga, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read(MLX90632_EE_Gb, (uint16_t *) Gb, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read(MLX90632_EE_Ha, (uint16_t *) Ha, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read(MLX90632_EE_Hb, (uint16_t *) Hb, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	ret = mlx90632_i2c_read(MLX90632_EE_Ka, (uint16_t *) Ka, hi2c);
+//	if(ret < 0)
+//		return ret;
+//	return 0;
+//}
