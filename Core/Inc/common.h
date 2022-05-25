@@ -1,8 +1,11 @@
-/*
- * common.h
- *
- *  Created on: Mar 14, 2022
- *      Author: falls
+/**
+ * @file common.h
+ * @author GerrFrog (ghaghal93@gmail.com)
+ * @brief File for common functions
+ * @version 1.0
+ * @date 2022-05-25
+ * 
+ * @copyright Copyright (c) 2022
  */
 
 #ifndef INC_COMMON_H_
@@ -11,6 +14,9 @@
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
 
+/**
+ * @brief CRC Table for calculation
+ */
 static const uint8_t crc_table[] = {
     0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15, 0x38, 0x3f, 0x36, 0x31,
     0x24, 0x23, 0x2a, 0x2d, 0x70, 0x77, 0x7e, 0x79, 0x6c, 0x6b, 0x62, 0x65,
@@ -36,10 +42,28 @@ static const uint8_t crc_table[] = {
     0xfa, 0xfd, 0xf4, 0xf3
 };
 
-uint8_t CRC8_Calc (uint8_t *p, uint8_t len);
+/**
+ * @brief Calculate Cyclic-Redundecy-Check (CRC8)
+ *
+ * @note Calculate checksum: http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+ *
+ * @param p Pointer to uint8_t
+ * @param len Length
+ * @return uint8_t Checksum
+ */
+uint8_t CRC8_Calc (
+    uint8_t *p, 
+    uint8_t len
+);
 
-int ScanDevices(I2C_HandleTypeDef hi2c);
-
-
+/**
+ * @brief Scan for devices in I2C bus
+ * 
+ * @param hi2c Handler for I2C
+ * @return int 
+ */
+int ScanDevices(
+    I2C_HandleTypeDef hi2c
+);
 
 #endif /* INC_COMMON_H_ */

@@ -94,10 +94,61 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
+/**
+ * @brief Handler for Errors
+ */
 void Error_Handler(void);
 
+#if defined(MLX90614) || defined(MLX90632)
 /* USER CODE BEGIN EFP */
-void float_temp_to_char_temp(double digit, char* arr);
+/**
+ * @brief Convert double temp in celcius to char array
+ * 
+ * @param digit Double temperature
+ * @param arr Array pointer
+ */
+void float_temp_to_char_temp(
+    double digit, 
+    char* arr
+);
+#endif
+
+#if defined(MLX90632)
+/**
+ * @brief Read EEPROM memory for parameters initializing
+ * 
+ * @param PR PR parameter
+ * @param PG PG parameter
+ * @param PO PO parameter
+ * @param PT PT parameter
+ * @param Ea Ea parameter
+ * @param Eb Eb parameter
+ * @param Fa Fa parameter
+ * @param Fb Fb parameter
+ * @param Ga Ga parameter
+ * @param Gb Gb parameter
+ * @param Ha Ha parameter
+ * @param Hb Hb parameter
+ * @param Ka Ka parameter
+ * @return int 
+ */
+static int mlx90632_read_eeprom(
+	int32_t *PR, 
+	int32_t *PG, 
+	int32_t *PO, 
+	int32_t *PT, 
+	int32_t *Ea, 
+	int32_t *Eb, 
+	int32_t *Fa, 
+	int32_t *Fb, 
+	int32_t *Ga, 
+	int16_t *Gb, 
+	int16_t *Ha, 
+	int16_t *Hb, 
+	int16_t *Ka, 
+	I2C_HandleTypeDef hi2c
+);
+#endif
 
 /* USER CODE END EFP */
 

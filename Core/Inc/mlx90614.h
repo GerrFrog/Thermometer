@@ -1,8 +1,11 @@
-/*
- * mlx90614.h
- *
- *  Created on: Oct 5, 2021
- *      Author: falls
+/**
+ * @file mlx90614.h
+ * @author GerrFrog (ghaghal93@gmail.com)
+ * @brief File contains all functions to work with MLX90614
+ * @version 1.0
+ * @date 2022-05-25
+ * 
+ * @copyright Copyright (c) 2022
  */
 
 #ifndef INC_MLX90614_H_
@@ -45,14 +48,82 @@
 #define MLX90614_DBG_MSG_W 0
 #define MLX90614_DBG_MSG_R 1
 
-void MLX90614_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_HandleTypeDef hi2c);
+/**
+ * @brief Write data to register
+ *
+ * @param devAddr Address of device
+ * @param regAddr Address of register
+ * @param data Data to write in register
+ * @param hi2c Handler of I2C
+ * @return void
+ */
+void MLX90614_WriteReg(
+    uint8_t devAddr, 
+    uint8_t regAddr, 
+    uint16_t data, 
+    I2C_HandleTypeDef hi2c
+);
 
-uint16_t MLX90614_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c);
+/**
+ * @brief Read data from register
+ *
+ * @param devAddr Device address
+ * @param regAddr Register address
+ * @param dbg_lvl Debug level
+ * @param hi2c Handler of I2C
+ * @return uint16_t Register data
+ */
+uint16_t MLX90614_ReadReg(
+    uint8_t devAddr, 
+    uint8_t regAddr, 
+    uint8_t dbg_lvl, 
+    I2C_HandleTypeDef hi2c
+);
 
-float MLX90614_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c);
+/**
+ * @brief Read temperature from sensor
+ *
+ * @param devAddr Device address
+ * @param regAddr Register address
+ * @param hi2c Handler of I2C
+ * @return float Temperature value
+ */
+float MLX90614_ReadTemp(
+    uint8_t devAddr, 
+    uint8_t regAddr, 
+    I2C_HandleTypeDef hi2c
+);
 
-void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, uint16_t data, uint8_t crc_in, uint8_t crc_calc);
+/**
+ * @brief Send debug message
+ *
+ * @param op_type Operation mode with error (write/read)
+ * @param devAddr Device address
+ * @param regAddr Register address
+ * @param data Input data
+ * @param crc_in Checksum in
+ * @param crc_calc Calculated checksum
+ * @return void
+ */
+void MLX90614_SendDebugMsg(
+    uint8_t op_type, 
+    uint8_t devAddr, 
+    uint8_t regAddr, 
+    uint16_t data, 
+    uint8_t crc_in, 
+    uint8_t crc_calc
+);
 
-double MLX90614_temp_compensation(double x);
+/**
+ * @brief Temperatur compensation for value
+ * 
+ * @note https://arachnoid.com/polysolve/
+ *
+ * @param x Value
+ * @return double
+ */
+double MLX90614_temp_compensation(
+    double x
+);
 
 #endif

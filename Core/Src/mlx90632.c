@@ -63,7 +63,8 @@ int mlx90632_start_measurement(I2C_HandleTypeDef hi2c)
     return (reg_status & MLX90632_STAT_CYCLE_POS) >> 2;
 }
 
-/** Based on @link mlx90632_start_measurement @endlink return value fill channel_new and channel_old
+/** 
+ * @brief Based on @link mlx90632_start_measurement @endlink return value fill channel_new and channel_old
  * variables with proper values. This is to provide a bit more flexibility in case other channels are
  * returned and need a bit more mingeling than usual maths can provide.
  *
@@ -97,7 +98,8 @@ STATIC int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, ui
     return 0;
 }
 
-/** Read ambient raw old and new values based on @link mlx90632_start_measurement @endlink return value.
+/** 
+ * @brief Read ambient raw old and new values based on @link mlx90632_start_measurement @endlink return value.
  *
  * Two i2c_reads are needed to obtain necessary raw ambient values from the sensor, as they are then
  * preprocessed before going to calculation functions. Because one value is newer than other (see @link
@@ -128,7 +130,8 @@ STATIC int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t 
     return ret;
 }
 
-/** Read object raw old and new values based on @link mlx90632_start_measurement @endlink return value.
+/** 
+ * @brief Read object raw old and new values based on @link mlx90632_start_measurement @endlink return value.
  *
  * Four i2c_reads are needed to obtain necessary raw object values from the sensor. These values are grouped per new
  * and old and then averaged before return of the function. After that they are then preprocessed before going to
@@ -260,7 +263,8 @@ double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_r
     return Bblock + Ablock + Cblock;
 }
 
-/** Iterative calculation of object temperature
+/** 
+ * @brief Iterative calculation of object temperature
  *
  * DSPv5 requires 3 iterations to reduce noise for object temperature. Since
  * each iteration requires same calculations this helper function is
@@ -305,7 +309,8 @@ STATIC double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32
     return sqrt(first_sqrt) - 273.15 - Hb_customer;
 }
 
-/** Iterative calculation of object temperature  when the environment temperature differs from the sensor temperature
+/** 
+ * @brief Iterative calculation of object temperature  when the environment temperature differs from the sensor temperature
  *
  * DSPv5 requires 3 iterations to reduce noise for object temperature. Since
  * each iteration requires same calculations this helper function is
@@ -686,48 +691,3 @@ mlx90632_meas_t mlx90632_get_refresh_rate(I2C_HandleTypeDef hi2c)
 
     return (mlx90632_meas_t)MLX90632_REFRESH_RATE(meas1);
 }
-
-//static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *PT, int32_t *Ea, int32_t *Eb, int32_t *Fa, int32_t *Fb, int32_t *Ga, int16_t *Gb, int16_t *Ha, int16_t *Hb, int16_t *Ka, I2C_HandleTypeDef hi2c)
-//{
-//	int32_t ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_P_R, (uint32_t *) PR, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_P_G, (uint32_t *) PG, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_P_O, (uint32_t *) PO, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_P_T, (uint32_t *) PT, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_Ea, (uint32_t *) Ea, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_Eb, (uint32_t *) Eb, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_Fa, (uint32_t *) Fa, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_Fb, (uint32_t *) Fb, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read32(MLX90632_EE_Ga, (uint32_t *) Ga, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read(MLX90632_EE_Gb, (uint16_t *) Gb, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read(MLX90632_EE_Ha, (uint16_t *) Ha, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read(MLX90632_EE_Hb, (uint16_t *) Hb, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	ret = mlx90632_i2c_read(MLX90632_EE_Ka, (uint16_t *) Ka, hi2c);
-//	if(ret < 0)
-//		return ret;
-//	return 0;
-//}

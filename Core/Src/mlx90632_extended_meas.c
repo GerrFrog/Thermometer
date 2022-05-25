@@ -21,16 +21,6 @@
 #define STATIC static
 #endif
 
-/** Read ambient raw old and new values for the extended range based on @link mlx90632_start_measurement @endlink return value.
- *
- * Two i2c_reads are needed to obtain necessary raw ambient values from the sensor, as they are then
- * preprocessed before going to calculation functions
- * @param[out] *ambient_new_raw Pointer to memory location where new ambient value from sensor is stored
- * @param[out] *ambient_old_raw Pointer to memory location where old ambient value from sensor is stored
- *
- * @retval 0 Successfully read both values
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
 STATIC int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw, I2C_HandleTypeDef hi2c)
 {
     int32_t ret;
@@ -49,17 +39,6 @@ STATIC int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw,
     return ret;
 }
 
-/** Read object raw values for the extended range based on @link mlx90632_start_measurement @endlink return value.
- *
- * Six i2c_reads are needed to obtain necessary raw object values from the sensor. These values are grouped and then
- * averaged before return of the function. After that they are then preprocessed before going to
- * calculation functions
- *
- * @param[out] *object_new_raw Pointer to memory location where average of new object values from sensor is stored
- *
- * @retval 0 Successfully read values
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
 STATIC int32_t mlx90632_read_temp_object_raw_extended(int16_t *object_new_raw, I2C_HandleTypeDef hi2c)
 {
     int32_t ret;
@@ -137,7 +116,6 @@ int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambie
     if (ret < 0) {
   	  return ret;
     }
-
 
     /** Read new **object** value from sensor */
     ret = mlx90632_read_temp_object_raw_extended(object_new_raw, hi2c);

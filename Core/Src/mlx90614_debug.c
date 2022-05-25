@@ -9,13 +9,6 @@
 #include "mlx90614.h"
 #include "ssd1306.h"
 
-/**
- * @brief Convert emissivity float type to emissivity char type
- *
- * @param emissivity Emissivity value (max 65535)
- * @param arr Pointer to output array
- * @return void
- */
 void int_emissivity_to_char_emissivity(int emissivity, char* arr)
 {
 	emissivity *= 10000;
@@ -32,12 +25,6 @@ void int_emissivity_to_char_emissivity(int emissivity, char* arr)
 	arr[0] = emissivity % 10 + '0';
 }
 
-/**
- * @brief Convert address (e.g. 0xFF) to char type
- *
- * @param address Address to convert
- * @param arr Pointer to output char array
- */
 void int_address_to_char_address(int address, char* arr)
 {
 	arr[5] = '\0';
@@ -52,13 +39,6 @@ void int_address_to_char_address(int address, char* arr)
 	arr[0] = address % 10 + '0';
 }
 
-/**
- * @brief Output message about debug to display
- *
- * @param message Pointer to message (what parameter)
- * @param char_param Parameter to output
- * @return void
- */
 void display_output(char* message, char* char_param, char hex)
 {
 	SSD1306_GotoXY (0,0);
@@ -81,13 +61,6 @@ void display_output(char* message, char* char_param, char hex)
 	SSD1306_Clear();
 }
 
-/**
- * @brief Start debugging for MLX90614 sensor
- *
- * @param mlx_addr I2C Address of MLX
- * @param hi2c I2C handler
- * @return void
- */
 void mlx90614_start_debugging(int mlx_addr, I2C_HandleTypeDef hi2c)
 {
 	  char debug_status[] = "Debug mode";

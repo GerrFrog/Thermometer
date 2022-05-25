@@ -24,7 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #ifdef USB_SEND
-#	include "usb_device.h"
+#   include "usb_device.h"
 #	include "usbd_cdc_if.h"
 #endif
 /* USER CODE END Includes */
@@ -49,7 +49,9 @@ I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c3;
 
 /* USER CODE BEGIN PV */
+
 uint8_t buffer[64];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,26 +66,9 @@ static void MX_I2C3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/**
- * @brief Convert temperature float type to temperature char type
- *
- * @param digit Temp value
- * @param arr Pointer to output array
- * @return void
- */
 #if defined(MLX90614) || defined(MLX90632)
 	void float_temp_to_char_temp(double digit, char* arr)
 	{
-//		if (digit <= 10.0)
-//		{
-//			arr[0] = 'l';
-//			arr[1] = 'e';
-//			arr[2] = 's';
-//			arr[3] = 's';
-//			arr[4] = '\0';
-//			arr[5] = '\0';
-//			return;
-//		}
 		int l_digit = digit * 100.0;
 		arr[7] = '\0';
 		arr[6] = '\0';
@@ -99,50 +84,52 @@ static void MX_I2C3_Init(void);
 	}
 #endif
 
-	static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *PT, int32_t *Ea, int32_t *Eb, int32_t *Fa, int32_t *Fb, int32_t *Ga, int16_t *Gb, int16_t *Ha, int16_t *Hb, int16_t *Ka, I2C_HandleTypeDef hi2c)
-	{
-		int32_t ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_P_R, (uint32_t *) PR, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_P_G, (uint32_t *) PG, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_P_O, (uint32_t *) PO, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_P_T, (uint32_t *) PT, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_Ea, (uint32_t *) Ea, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_Eb, (uint32_t *) Eb, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_Fa, (uint32_t *) Fa, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_Fb, (uint32_t *) Fb, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read32(MLX90632_EE_Ga, (uint32_t *) Ga, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read(MLX90632_EE_Gb, (uint16_t *) Gb, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read(MLX90632_EE_Ha, (uint16_t *) Ha, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read(MLX90632_EE_Hb, (uint16_t *) Hb, hi2c);
-		if(ret < 0)
-			return ret;
-		ret = mlx90632_i2c_read(MLX90632_EE_Ka, (uint16_t *) Ka, hi2c);
-		if(ret < 0)
-			return ret;
-		return 0;
-	}
+#if defined(MLX90632)
+static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *PT, int32_t *Ea, int32_t *Eb, int32_t *Fa, int32_t *Fb, int32_t *Ga, int16_t *Gb, int16_t *Ha, int16_t *Hb, int16_t *Ka, I2C_HandleTypeDef hi2c)
+{
+    int32_t ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_P_R, (uint32_t *) PR, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_P_G, (uint32_t *) PG, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_P_O, (uint32_t *) PO, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_P_T, (uint32_t *) PT, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_Ea, (uint32_t *) Ea, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_Eb, (uint32_t *) Eb, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_Fa, (uint32_t *) Fa, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_Fb, (uint32_t *) Fb, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read32(MLX90632_EE_Ga, (uint32_t *) Ga, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read(MLX90632_EE_Gb, (uint16_t *) Gb, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read(MLX90632_EE_Ha, (uint16_t *) Ha, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read(MLX90632_EE_Hb, (uint16_t *) Hb, hi2c);
+    if(ret < 0)
+        return ret;
+    ret = mlx90632_i2c_read(MLX90632_EE_Ka, (uint16_t *) Ka, hi2c);
+    if(ret < 0)
+        return ret;
+    return 0;
+}
+#endif
 
 /* USER CODE END 0 */
 
@@ -152,175 +139,168 @@ static void MX_I2C3_Init(void);
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+    /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_I2C1_Init();
-  MX_I2C2_Init();
-  MX_USB_DEVICE_Init();
-  MX_I2C3_Init();
-  /* USER CODE BEGIN 2 */
-  /**
-   * 12 - green, 13 - orange, 14 - red, 15 - blue
-   *
-   * Display 10x12 - 10 to right, 12 to below
-   *
-   * Temp sensor 1 - I2C1, temp sensor 2 - I2C2, Display - I2C3
-   *
-   *
-   */
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_I2C1_Init();
+    MX_I2C2_Init();
+    MX_USB_DEVICE_Init();
+    MX_I2C3_Init();
+    /* USER CODE BEGIN 2 */
+
+    /**
+     * 12 - green, 13 - orange, 14 - red, 15 - blue
+     *
+     * Display 10x12 - 10 to right, 12 to below
+     *
+     * Temp sensor 1 - I2C1, temp sensor 2 - I2C2, Display - I2C3
+     */
 #ifdef USB_SEND
-  uint8_t *message_1 = "Temperature from 1st Sensor: \0";
-  uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
-  uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
-  uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
-  uint8_t *end = "\n\0";
+    uint8_t *message_1 = "Temperature from 1st Sensor: \0";
+    uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
+    uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
+    uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
+    uint8_t *end = "\n\0";
 #endif
 
   // Initialize Display
 #ifdef SSD1306_DISPLAY
-  {
-	  if (SSD1306_Init(hi2c3) != 1)
-	  {
-		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		  HAL_Delay(1000);
-		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-	  }
+    if (SSD1306_Init(hi2c3) != 1)
+    {
+        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+        HAL_Delay(1000);
+        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+    }
 
-	  SSD1306_GotoXY (0,0);
-	  SSD1306_Puts ("initialize", &Font_11x18, 1);
-	  SSD1306_UpdateScreen();
-  }
+    SSD1306_GotoXY (0,0);
+    SSD1306_Puts ("initialize", &Font_11x18, 1);
+    SSD1306_UpdateScreen();
 #endif
 
-//  HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
-//
-//  if (result == HAL_OK) {
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//	  HAL_Delay(1000);
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//	  HAL_Delay(1000);
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//  } else {
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//	  HAL_Delay(1000);
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//	  HAL_Delay(1000);
-//	  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//  }
+    // HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
 
+    // if (result == HAL_OK) {
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+    //     HAL_Delay(1000);
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+    //     HAL_Delay(500);
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+    //     HAL_Delay(1000);
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+    // } else {
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+    //     HAL_Delay(1000);
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+    //     HAL_Delay(500);
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+    //     HAL_Delay(1000);
+    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+    // }
 
+    // int16_t ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw,
+    //         PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+    //         Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+    //         Ga = -14556410, Ha = 16384, Hb = 0, Gb = 9728, Ka = 10752;
+    // int32_t ret = 0; /**< Variable will store return values */
+    // double ambient; /**< Ambient temperature in degrees Celsius */
+    // double object; /**< Object temperature in degrees Celsius */
 
-//  int16_t ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw,
-//  	  	  PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
-//		  Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-//		  Ga = -14556410, Ha = 16384, Hb = 0, Gb = 9728, Ka = 10752;
-//  int32_t ret = 0; /**< Variable will store return values */
-//  double ambient; /**< Ambient temperature in degrees Celsius */
-//  double object; /**< Object temperature in degrees Celsius */
-//
-//  /* Read sensor EEPROM registers needed for calcualtions */
-//
-//  /* You can check if the device supports extended measurement mode */
-//  ret = mlx90632_init(hi2c1);
-//
-//  /* Set MLX90632 in extended mode */
-//  ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
-//  if(ret < 0) {
-//  }
-//
-//  /* Now we read current ambient and object temperature */
-//  ret = mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
-//  if(ret < 0) {
-//
-//  }
-//
-//  /* Now start calculations (no more i2c accesses) */
-//  /* Calculate ambient temperature */
-//  ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
-//                                                PT, PR, PG, PO, Gb);
-//
-//  /* Get preprocessed temperatures needed for object temperature calculation */
-//  double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
-//                                                                 ambient_old_raw, Gb);
-//  double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
-//                                                               ambient_old_raw, Ka);
-//
-//  /* Calculate object temperature assuming the reflected temperature equals ambient*/
-//  object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
-//
-//  char ch[8];
-//  float_temp_to_char_temp(object, ch);
-//
-//  SSD1306_GotoXY (0,0);
-//  SSD1306_Puts (ch, &Font_11x18, 1);
-//  SSD1306_UpdateScreen();
-//
-//  return 0;
+    // /* Read sensor EEPROM registers needed for calcualtions */
 
+    // /* You can check if the device supports extended measurement mode */
+    // ret = mlx90632_init(hi2c1);
 
+    // /* Set MLX90632 in extended mode */
+    // ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
+    // if(ret < 0) {
+    // }
 
+    // /* Now we read current ambient and object temperature */
+    // ret = mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
+    // if(ret < 0) {
 
-  uint16_t mlx_addr_1 = 0;
-  uint16_t mlx_addr_2 = 0;
+    // }
 
-  float float_temp_1 = 0.0;
-  float float_temp_2 = 0.0;
+    // /* Now start calculations (no more i2c accesses) */
+    // /* Calculate ambient temperature */
+    // ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
+    //                                             PT, PR, PG, PO, Gb);
 
-  char char_temp_1[8];
-  char char_temp_2[8];
+    // /* Get preprocessed temperatures needed for object temperature calculation */
+    // double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+    //                                                             ambient_old_raw, Gb);
+    // double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+    //                                                             ambient_old_raw, Ka);
+
+    // /* Calculate object temperature assuming the reflected temperature equals ambient*/
+    // object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+    // char ch[8];
+    // float_temp_to_char_temp(object, ch);
+
+    // SSD1306_GotoXY (0,0);
+    // SSD1306_Puts (ch, &Font_11x18, 1);
+    // SSD1306_UpdateScreen();
+
+    // return 0;
+
+    uint16_t mlx_addr_1 = 0;
+    uint16_t mlx_addr_2 = 0;
+
+    float float_temp_1 = 0.0;
+    float float_temp_2 = 0.0;
+
+    char char_temp_1[8];
+    char char_temp_2[8];
 
 #if defined(MLX90614)
-  mlx_addr_1 = device_scanner(hi2c1);
-  mlx_addr_2 = device_scanner(hi2c2);
+    mlx_addr_1 = device_scanner(hi2c1);
+    mlx_addr_2 = device_scanner(hi2c2);
 #elif defined(MLX90632)
-  mlx_addr_1 = 0x3a << 1;
-  mlx_addr_2 = 0x3a << 1;
+    mlx_addr_1 = 0x3a << 1;
+    mlx_addr_2 = 0x3a << 1;
 
-  float pre_ambient, pre_object, ambient, object;
+    float pre_ambient, pre_object, ambient, object;
 
-  int32_t
-  	  	  PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
-		  Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-		  Ga = -14556410;
-  int16_t
-  	  	  Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
-		  ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
+    int32_t
+            PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+            Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+            Ga = -14556410;
+    int16_t
+            Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
+            ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
 
-  mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
+    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
 #endif
 
 #ifdef SSD1306_DISPLAY
-  SSD1306_Clear();
+    SSD1306_Clear();
 #endif
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
 #ifdef MLX90614_FLASH_MODE
     mlx90614_flash(mlx_addr_1, MLX90614_EMISSIVITY, 0xF332, hi2c1);
 #elif defined(MLX90632_FLASH_MODE)
@@ -356,8 +336,6 @@ int main(void)
 	float_temp_1 = object;
 	float_temp_to_char_temp(float_temp_1, char_temp_1);
 #endif
-
-
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
 	{
 #	ifdef SSD1306_DISPLAY
@@ -403,7 +381,8 @@ int main(void)
 	}
 #	endif
 
-	HAL_Delay(10);
+//	HAL_Delay(10);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

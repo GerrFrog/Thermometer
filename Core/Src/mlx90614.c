@@ -6,19 +6,8 @@
  */
 #include "mlx90614.h"
 
-//extern I2C_HandleTypeDef hi2c1;
-//extern I2C_HandleTypeDef hi2c2;
 char temp_buff[128] = {};
 
-/**
- * @brief Write data to register
- *
- * @param devAddr Address of device
- * @param regAddr Address of register
- * @param data Data to write in register
- * @param hi2c Handler of I2C
- * @return void
- */
 void MLX90614_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_HandleTypeDef hi2c)
 {
 	uint8_t i2cdata[4], temp[4];
@@ -54,15 +43,6 @@ void MLX90614_WriteReg(uint8_t devAddr, uint8_t regAddr, uint16_t data, I2C_Hand
 	MLX90614_SendDebugMsg(MLX90614_DBG_MSG_W, devAddr, i2cdata[0], data, i2cdata[3], 0x00);
 }
 
-/**
- * @brief Read data from register
- *
- * @param devAddr Device address
- * @param regAddr Register address
- * @param dbg_lvl Debug level
- * @param hi2c Handler of I2C
- * @return uint16_t Register data
- */
 uint16_t MLX90614_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C_HandleTypeDef hi2c)
 {
 	uint16_t data;
@@ -90,14 +70,6 @@ uint16_t MLX90614_ReadReg(uint8_t devAddr, uint8_t regAddr, uint8_t dbg_lvl, I2C
 	return data;
 }
 
-/**
- * @brief Read temperature from sensor
- *
- * @param devAddr Device address
- * @param regAddr Register address
- * @param hi2c Handler of I2C
- * @return float Temperature value
- */
 float MLX90614_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c)
 {
 	float temp;
@@ -110,17 +82,6 @@ float MLX90614_ReadTemp(uint8_t devAddr, uint8_t regAddr, I2C_HandleTypeDef hi2c
 	return temp;
 }
 
-/**
- * @brief Send debug message
- *
- * @param op_type Operation mode with error (write/read)
- * @param devAddr Device address
- * @param regAddr Register address
- * @param data Input data
- * @param crc_in Checksum in
- * @param crc_calc Calculated checksum
- * @return void
- */
 void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, uint16_t data, uint8_t crc_in, uint8_t crc_calc)
 {
 	if(op_type == MLX90614_DBG_MSG_W) {
@@ -131,14 +92,6 @@ void MLX90614_SendDebugMsg(uint8_t op_type, uint8_t devAddr, uint8_t regAddr, ui
 	}
 }
 
-/**
- * @brief Temperatur compensation for value
- * 
- * @note https://arachnoid.com/polysolve/
- *
- * @param x Value
- * @return double
- */
 double MLX90614_temp_compensation(double x)
 {
 	double terms[] = {
