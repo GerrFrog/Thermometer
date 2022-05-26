@@ -18,9 +18,9 @@ mlx90632.c:463:9:mlx90632_addressed_reset	104	static
 mlx90632.c:490:9:mlx90632_get_measurement_time	112	static
 mlx90632.c:505:9:mlx90632_calculate_dataset_ready_time	88	static
 mlx90632.c:555:9:mlx90632_start_measurement_burst	112	static
-mlx90632.c:600:16:mlx90632_unlock_eeporm	88	static
-mlx90632.c:605:16:mlx90632_wait_for_eeprom_not_busy	104	static
-mlx90632.c:618:16:mlx90632_erase_eeprom	112	static
-mlx90632.c:633:16:mlx90632_write_eeprom	112	static
-mlx90632.c:652:9:mlx90632_set_refresh_rate	120	static
-mlx90632.c:683:17:mlx90632_get_refresh_rate	104	static
+mlx90632.c:601:16:mlx90632_unlock_eeporm	88	static
+mlx90632.c:606:16:mlx90632_wait_for_eeprom_not_busy	104	static
+mlx90632.c:619:16:mlx90632_erase_eeprom	112	static
+mlx90632.c:634:16:mlx90632_write_eeprom	112	static
+mlx90632.c:653:9:mlx90632_set_refresh_rate	120	static
+mlx90632.c:684:17:mlx90632_get_refresh_rate	104	static

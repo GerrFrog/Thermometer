@@ -13,6 +13,7 @@
 
 #include <errno.h>
 #include "mlx90632_extended_meas.h"
+#include "mlx90632_depends.h"
 #include "stm32f4xx_hal.h"
 
 /* Solve errno not defined values */

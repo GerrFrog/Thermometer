@@ -59,6 +59,27 @@ uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
 uint8_t *end = "\n\0";
 #endif
 
+#ifdef MLX90632
+uint16_t mlx_addr_1 = 0x3a << 1;
+uint16_t mlx_addr_2 = 0x3a << 1;
+
+float float_temp_1 = 0.0;
+float float_temp_2 = 0.0;
+
+char char_temp_1[8];
+char char_temp_2[8];
+
+float pre_ambient, pre_object, ambient, object;
+
+int32_t
+    PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+    Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+    Ga = -14556410;
+int16_t
+    Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
+    ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
+#endif
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -139,24 +160,26 @@ static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *
 
 void mlx90632_start_standard_mode()
 {
-    uint16_t mlx_addr_1 = 0x3a << 1;
-    uint16_t mlx_addr_2 = 0x3a << 1;
+	HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+	if (result == HAL_OK) {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	} else {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	}
 
-    float float_temp_1 = 0.0;
-    float float_temp_2 = 0.0;
-
-    char char_temp_1[8];
-    char char_temp_2[8];
-
-    float pre_ambient, pre_object, ambient, object;
-
-    int32_t
-        PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
-        Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-        Ga = -14556410;
-    int16_t
-        Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
-        ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
+//	mlx90632_set_meas_type(MLX90632_MTYP_MEDICAL, hi2c1);
 
     mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
 
@@ -171,7 +194,7 @@ void mlx90632_start_standard_mode()
         pre_ambient = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
         pre_object = mlx90632_preprocess_temp_object(object_new_raw, object_old_raw, ambient_new_raw, ambient_old_raw, Ka);
 
-        mlx90632_set_emissivity(0.95);
+        mlx90632_set_emissivity(1);
 
         ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, PT, PR, PG, PO, Gb);
         object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
@@ -224,49 +247,155 @@ void mlx90632_start_standard_mode()
 
 void mlx90632_start_extended_mode()
 {
-    uint16_t mlx_addr_1 = 0x3a << 1;
-    uint16_t mlx_addr_2 = 0x3a << 1;
+	HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+	if (result == HAL_OK) {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	} else {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	}
 
-    float float_temp_1 = 0.0;
-    float float_temp_2 = 0.0;
+    mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
 
-    char char_temp_1[8];
-    char char_temp_2[8];
-
-    float pre_ambient, pre_object, ambient, object;
-
-    int32_t
-        PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
-        Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-        Ga = -14556410;
-    int16_t
-        Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
-        ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
-
-    int32_t ret, status;
-    ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
-//	if(status == ERANGE)
-//	{
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//		 HAL_Delay(1000);
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//		 HAL_Delay(500);
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//		 HAL_Delay(1000);
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-//	} else {
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//		 HAL_Delay(1000);
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//		 HAL_Delay(500);
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//		 HAL_Delay(1000);
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-//	}
+    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
 
     while(1)
     {
+    	mlx90632_set_emissivity(0.5);
 
+    	mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
+
+        ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
+                                                      PT, PR, PG, PO, Gb);
+
+        pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+                                                                       ambient_old_raw, Gb);
+        pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+                                                                     ambient_old_raw, Ka);
+
+        object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+        float_temp_1 = object;
+        float_temp_to_char_temp(float_temp_1, char_temp_1);
+
+        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
+        {
+#	        ifdef SSD1306_DISPLAY
+            SSD1306_GotoXY(0, 0);
+            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+            SSD1306_GotoXY(70, 0);
+            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	        endif
+
+#		    ifdef USB_SEND
+            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+            CDC_Transmit_FS(end, strlen(end));
+
+            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+            CDC_Transmit_FS(end, strlen(end));
+#  		    endif
+        }
+
+#       ifdef SSD1306_DISPLAY
+        SSD1306_GotoXY(0, 29);
+        SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+        SSD1306_GotoXY(70, 29);
+        SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+        SSD1306_UpdateScreen();
+#       endif
+    }
+}
+
+void mlx90632_start_extended_burst_mode()
+{
+	HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+	if (result == HAL_OK) {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	} else {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	}
+
+    mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED_BURST, hi2c1);
+
+    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
+
+    while(1)
+    {
+    	mlx90632_set_emissivity(1);
+
+        mlx90632_read_temp_raw_extended_burst(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
+
+        ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
+                                                      PT, PR, PG, PO, Gb);
+
+        pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+                                                                       ambient_old_raw, Gb);
+        pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+                                                                     ambient_old_raw, Ka);
+
+        object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+        float_temp_1 = object;
+        float_temp_to_char_temp(float_temp_1, char_temp_1);
+
+        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
+        {
+#	        ifdef SSD1306_DISPLAY
+            SSD1306_GotoXY(0, 0);
+            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+            SSD1306_GotoXY(70, 0);
+            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	        endif
+
+#		    ifdef USB_SEND
+            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+            CDC_Transmit_FS(end, strlen(end));
+
+            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+            CDC_Transmit_FS(end, strlen(end));
+#  		    endif
+        }
+
+#       ifdef SSD1306_DISPLAY
+        SSD1306_GotoXY(0, 29);
+        SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+        SSD1306_GotoXY(70, 29);
+        SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+        SSD1306_UpdateScreen();
+#       endif
     }
 }
 #elif defined(MLX90614)
@@ -398,73 +527,6 @@ int main(void)
     SSD1306_UpdateScreen();
 #endif
 
-    // HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
-
-    // if (result == HAL_OK) {
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-    //     HAL_Delay(1000);
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-    //     HAL_Delay(500);
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-    //     HAL_Delay(1000);
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-    // } else {
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-    //     HAL_Delay(1000);
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-    //     HAL_Delay(500);
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-    //     HAL_Delay(1000);
-    //     HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-    // }
-
-    // int16_t ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw,
-    //         PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
-    //         Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-    //         Ga = -14556410, Ha = 16384, Hb = 0, Gb = 9728, Ka = 10752;
-    // int32_t ret = 0; /**< Variable will store return values */
-    // double ambient; /**< Ambient temperature in degrees Celsius */
-    // double object; /**< Object temperature in degrees Celsius */
-
-    // /* Read sensor EEPROM registers needed for calcualtions */
-
-    // /* You can check if the device supports extended measurement mode */
-    // ret = mlx90632_init(hi2c1);
-
-    // /* Set MLX90632 in extended mode */
-    // ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
-    // if(ret < 0) {
-    // }
-
-    // /* Now we read current ambient and object temperature */
-    // ret = mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
-    // if(ret < 0) {
-
-    // }
-
-    // /* Now start calculations (no more i2c accesses) */
-    // /* Calculate ambient temperature */
-    // ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
-    //                                             PT, PR, PG, PO, Gb);
-
-    // /* Get preprocessed temperatures needed for object temperature calculation */
-    // double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
-    //                                                             ambient_old_raw, Gb);
-    // double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
-    //                                                             ambient_old_raw, Ka);
-
-    // /* Calculate object temperature assuming the reflected temperature equals ambient*/
-    // object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
-
-    // char ch[8];
-    // float_temp_to_char_temp(object, ch);
-
-    // SSD1306_GotoXY (0,0);
-    // SSD1306_Puts (ch, &Font_11x18, 1);
-    // SSD1306_UpdateScreen();
-
-    // return 0;
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -487,6 +549,7 @@ int main(void)
 #elif defined(MLX90632)
 //    mlx90632_start_standard_mode();
     mlx90632_start_extended_mode();
+//    mlx90632_start_extended_burst_mode();
 #endif
 
     /* USER CODE END WHILE */

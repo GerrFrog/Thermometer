@@ -158,6 +158,11 @@ void mlx90632_start_standard_mode();
  * @brief Start work for MLX90632 in extended mode
  */
 void mlx90632_start_extended_mode();
+
+/**
+ * @brief Start work for MLX90632 in extended burst mode
+ */
+void mlx90632_start_extended_burst_mode();
 #elif defined(MLX90614)
 /**
  * @brief Start work for MLX90614 in standard mode

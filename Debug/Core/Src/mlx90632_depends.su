@@ -1,4 +1,4 @@
 mlx90632_depends.c:14:9:mlx90632_i2c_read	40	static
-mlx90632_depends.c:43:9:mlx90632_i2c_read32	40	static
-mlx90632_depends.c:54:9:mlx90632_i2c_write	40	static
-mlx90632_depends.c:61:6:usleep	16	static
+mlx90632_depends.c:25:9:mlx90632_i2c_read32	40	static
+mlx90632_depends.c:36:9:mlx90632_i2c_write	40	static
+mlx90632_depends.c:43:6:usleep	16	static

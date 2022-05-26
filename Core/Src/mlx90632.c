@@ -467,8 +467,8 @@ int32_t mlx90632_addressed_reset(I2C_HandleTypeDef hi2c)
     uint16_t reg_value;
 
     ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg_value, hi2c);
-    if (ret < 0)
-        return ret;
+//    if (ret < 0)
+//        return ret;
 
     reg_ctrl = reg_value & ~MLX90632_CFG_PWR_MASK;
     reg_ctrl |= MLX90632_PWR_STATUS_STEP;
@@ -477,8 +477,8 @@ int32_t mlx90632_addressed_reset(I2C_HandleTypeDef hi2c)
         return ret;
 
     ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD, hi2c);
-    if (ret < 0)
-        return ret;
+//    if (ret < 0)
+//        return ret;
 
     usleep(150, 200);
 
@@ -571,7 +571,8 @@ int32_t mlx90632_start_measurement_burst(I2C_HandleTypeDef hi2c)
     ret = mlx90632_calculate_dataset_ready_time(hi2c);
     if (ret < 0)
         return ret;
-    msleep(ret); /* Waiting for refresh of all the measurement tables */
+//    msleep(ret); /* Waiting for refresh of all the measurement tables */
+    HAL_Delay(ret);
 
     while (tries-- > 0)
     {
