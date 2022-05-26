@@ -148,6 +148,21 @@ static int mlx90632_read_eeprom(
 	int16_t *Ka, 
 	I2C_HandleTypeDef hi2c
 );
+
+/**
+ * @brief Start work for MLX9632 in standard mode
+ */
+void mlx90632_start_standard_mode();
+
+/**
+ * @brief Start work for MLX90632 in extended mode
+ */
+void mlx90632_start_extended_mode();
+#elif defined(MLX90614)
+/**
+ * @brief Start work for MLX90614 in standard mode
+ */
+void mlx90614_start_standard_mode();
 #endif
 
 /* USER CODE END EFP */

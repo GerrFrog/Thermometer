@@ -51,6 +51,13 @@ I2C_HandleTypeDef hi2c3;
 /* USER CODE BEGIN PV */
 
 uint8_t buffer[64];
+#ifdef USB_SEND
+uint8_t *message_1 = "Temperature from 1st Sensor: \0";
+uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
+uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
+uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
+uint8_t *end = "\n\0";
+#endif
 
 /* USER CODE END PV */
 
@@ -67,21 +74,21 @@ static void MX_I2C3_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 #if defined(MLX90614) || defined(MLX90632)
-	void float_temp_to_char_temp(double digit, char* arr)
-	{
-		int l_digit = digit * 100.0;
-		arr[7] = '\0';
-		arr[6] = '\0';
-		arr[5] = '\0';
-		arr[4] = l_digit % 10 + '0';
-		l_digit /= 10;
-		arr[3] = l_digit % 10 + '0';
-		l_digit /= 10;
-		arr[2] = ',';
-		arr[1] = l_digit % 10 + '0';
-		l_digit /= 10;
-		arr[0] = l_digit % 10 + '0';
-	}
+void float_temp_to_char_temp(double digit, char* arr)
+{
+    int l_digit = digit * 100.0;
+    arr[7] = '\0';
+    arr[6] = '\0';
+    arr[5] = '\0';
+    arr[4] = l_digit % 10 + '0';
+    l_digit /= 10;
+    arr[3] = l_digit % 10 + '0';
+    l_digit /= 10;
+    arr[2] = ',';
+    arr[1] = l_digit % 10 + '0';
+    l_digit /= 10;
+    arr[0] = l_digit % 10 + '0';
+}
 #endif
 
 #if defined(MLX90632)
@@ -129,6 +136,208 @@ static int mlx90632_read_eeprom(int32_t *PR, int32_t *PG, int32_t *PO, int32_t *
         return ret;
     return 0;
 }
+
+void mlx90632_start_standard_mode()
+{
+    uint16_t mlx_addr_1 = 0x3a << 1;
+    uint16_t mlx_addr_2 = 0x3a << 1;
+
+    float float_temp_1 = 0.0;
+    float float_temp_2 = 0.0;
+
+    char char_temp_1[8];
+    char char_temp_2[8];
+
+    float pre_ambient, pre_object, ambient, object;
+
+    int32_t
+        PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+        Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+        Ga = -14556410;
+    int16_t
+        Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
+        ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
+
+    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
+
+#ifdef SSD1306_DISPLAY
+    SSD1306_Clear();
+#endif
+
+    while(1)
+    {
+        mlx90632_read_temp_raw(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw, hi2c1);
+
+        pre_ambient = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
+        pre_object = mlx90632_preprocess_temp_object(object_new_raw, object_old_raw, ambient_new_raw, ambient_old_raw, Ka);
+
+        mlx90632_set_emissivity(0.95);
+
+        ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, PT, PR, PG, PO, Gb);
+        object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+        float_temp_1 = object;
+        float_temp_to_char_temp(float_temp_1, char_temp_1);
+
+        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
+        {
+#	        ifdef SSD1306_DISPLAY
+            SSD1306_GotoXY(0, 0);
+            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+            SSD1306_GotoXY(70, 0);
+            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	        endif
+
+#		    ifdef USB_SEND
+            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+            CDC_Transmit_FS(end, strlen(end));
+
+            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+            CDC_Transmit_FS(end, strlen(end));
+#  		    endif
+        }
+
+#       ifdef SSD1306_DISPLAY
+        SSD1306_GotoXY(0, 29);
+        SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+        SSD1306_GotoXY(70, 29);
+        SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+        SSD1306_UpdateScreen();
+#       endif
+
+#	    ifdef USB_SEND
+        CDC_Transmit_FS(message_1, strlen(message_1));
+        CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+        CDC_Transmit_FS(end, strlen(end));
+
+        CDC_Transmit_FS(message_2, strlen(message_2));
+        CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+        CDC_Transmit_FS(end, strlen(end));
+#	    endif
+    }
+}
+
+void mlx90632_start_extended_mode()
+{
+    uint16_t mlx_addr_1 = 0x3a << 1;
+    uint16_t mlx_addr_2 = 0x3a << 1;
+
+    float float_temp_1 = 0.0;
+    float float_temp_2 = 0.0;
+
+    char char_temp_1[8];
+    char char_temp_2[8];
+
+    float pre_ambient, pre_object, ambient, object;
+
+    int32_t
+        PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
+        Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
+        Ga = -14556410;
+    int16_t
+        Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
+        ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
+
+    int32_t ret, status;
+    ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
+//	if(status == ERANGE)
+//	{
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//		 HAL_Delay(1000);
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//		 HAL_Delay(500);
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//		 HAL_Delay(1000);
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+//	} else {
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//		 HAL_Delay(1000);
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//		 HAL_Delay(500);
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//		 HAL_Delay(1000);
+//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+//	}
+
+    while(1)
+    {
+
+    }
+}
+#elif defined(MLX90614)
+void mlx90614_start_standard_mode()
+{
+    uint16_t mlx_addr_1 = device_scanner(hi2c1);
+    uint16_t mlx_addr_2 = device_scanner(hi2c2);
+
+    float float_temp_1 = 0.0;
+    float float_temp_2 = 0.0;
+
+    char char_temp_1[8];
+    char char_temp_2[8];
+
+#   ifdef SSD1306_DISPLAY
+    SSD1306_Clear();
+#   endif
+
+    while(1)
+    {
+        float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, MLX90614_TOBJ1, hi2c1);
+        float_temp_1 = MLX90614_temp_compensation(float_temp_1);
+        float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
+
+        float_temp_to_char_temp(float_temp_1, char_temp_1);
+        float_temp_to_char_temp(float_temp_2, char_temp_2);
+
+        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
+        {
+#	        ifdef SSD1306_DISPLAY
+            SSD1306_GotoXY(0, 0);
+            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+            SSD1306_GotoXY(70, 0);
+            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	        endif
+
+#		    ifdef USB_SEND
+            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+            CDC_Transmit_FS(end, strlen(end));
+
+            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+            CDC_Transmit_FS(end, strlen(end));
+#		    endif
+        }
+
+#       ifdef SSD1306_DISPLAY
+        SSD1306_GotoXY(0, 29);
+        SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+        SSD1306_GotoXY(70, 29);
+        SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+        SSD1306_UpdateScreen();
+#       endif
+
+#	    ifdef USB_SEND
+        CDC_Transmit_FS(message_1, strlen(message_1));
+        CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+        CDC_Transmit_FS(end, strlen(end));
+
+        CDC_Transmit_FS(message_2, strlen(message_2));
+        CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+        CDC_Transmit_FS(end, strlen(end));
+#	    endif
+
+	// HAL_Delay(10);
+    }
+}
 #endif
 
 /* USER CODE END 0 */
@@ -174,13 +383,6 @@ int main(void)
      *
      * Temp sensor 1 - I2C1, temp sensor 2 - I2C2, Display - I2C3
      */
-#ifdef USB_SEND
-    uint8_t *message_1 = "Temperature from 1st Sensor: \0";
-    uint8_t *message_2 = "Temperature from 2nd Sensor: \0";
-    uint8_t *cap_mess_1 = "Captured temperature from 1st Sensor: \0";
-    uint8_t *cap_mess_2 = "Captured temperature from 2st Sensor: \0";
-    uint8_t *end = "\n\0";
-#endif
 
   // Initialize Display
 #ifdef SSD1306_DISPLAY
@@ -263,39 +465,6 @@ int main(void)
 
     // return 0;
 
-    uint16_t mlx_addr_1 = 0;
-    uint16_t mlx_addr_2 = 0;
-
-    float float_temp_1 = 0.0;
-    float float_temp_2 = 0.0;
-
-    char char_temp_1[8];
-    char char_temp_2[8];
-
-#if defined(MLX90614)
-    mlx_addr_1 = device_scanner(hi2c1);
-    mlx_addr_2 = device_scanner(hi2c2);
-#elif defined(MLX90632)
-    mlx_addr_1 = 0x3a << 1;
-    mlx_addr_2 = 0x3a << 1;
-
-    float pre_ambient, pre_object, ambient, object;
-
-    int32_t
-            PR = 0x00587f5b, PG = 0x04a10289, PT = 0xfff966f8, PO = 0x00001e0f,
-            Ea = 4859535, Eb = 5686508, Fa = 53855361, Fb = 42874149,
-            Ga = -14556410;
-    int16_t
-            Gb = 9728, Ha = 16384, Hb = 0, Ka = 10752,
-            ambient_new_raw, ambient_old_raw, object_new_raw, object_old_raw;
-
-    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
-#endif
-
-#ifdef SSD1306_DISPLAY
-    SSD1306_Clear();
-#endif
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -313,80 +482,17 @@ int main(void)
     mlx90632_start_debugging(mlx_addr_1, hi2c1);
 #endif
 
-  while (1)
-  {
 #if defined(MLX90614)
-	float_temp_1 = MLX90614_ReadTemp(mlx_addr_1, MLX90614_TOBJ1, hi2c1);
-	float_temp_1 = MLX90614_temp_compensation(float_temp_1);
-	float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
-
-	float_temp_to_char_temp(float_temp_1, char_temp_1);
-	float_temp_to_char_temp(float_temp_2, char_temp_2);
+    mlx90614_start_standard_mode();
 #elif defined(MLX90632)
-	mlx90632_read_temp_raw(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw, hi2c1);
-
-	pre_ambient = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
-	pre_object = mlx90632_preprocess_temp_object(object_new_raw, object_old_raw, ambient_new_raw, ambient_old_raw, Ka);
-
-	mlx90632_set_emissivity(0.95);
-
-	ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, PT, PR, PG, PO, Gb);
-	object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
-
-	float_temp_1 = object;
-	float_temp_to_char_temp(float_temp_1, char_temp_1);
+//    mlx90632_start_standard_mode();
+    mlx90632_start_extended_mode();
 #endif
-	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
-	{
-#	ifdef SSD1306_DISPLAY
-		SSD1306_GotoXY(0, 0);
-		SSD1306_Puts(char_temp_1, &Font_11x18, 1);
-
-		SSD1306_GotoXY(70, 0);
-		SSD1306_Puts(char_temp_2, &Font_11x18, 1);
-#	endif
-
-#		ifdef USB_SEND
-		{
-			CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
-			CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-			CDC_Transmit_FS(end, strlen(end));
-
-			CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
-			CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-			CDC_Transmit_FS(end, strlen(end));
-		}
-#		endif
-	}
-
-#ifdef SSD1306_DISPLAY
-	SSD1306_GotoXY(0, 29);
-	SSD1306_Puts(char_temp_1, &Font_11x18, 1);
-
-	SSD1306_GotoXY(70, 29);
-	SSD1306_Puts(char_temp_2, &Font_11x18, 1);
-
-	SSD1306_UpdateScreen();
-#endif
-
-#	ifdef USB_SEND
-	{
-		CDC_Transmit_FS(message_1, strlen(message_1));
-		CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-		CDC_Transmit_FS(end, strlen(end));
-
-		CDC_Transmit_FS(message_2, strlen(message_2));
-		CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-		CDC_Transmit_FS(end, strlen(end));
-	}
-#	endif
-
-//	HAL_Delay(10);
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
 }
 
