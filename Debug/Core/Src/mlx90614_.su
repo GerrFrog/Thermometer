@@ -1,0 +1,9 @@
+mlx90614_.c:9:6:MLX90614_ctor	24	static
+mlx90614_.c:54:6:MLX90614_write_reg	120	static
+mlx90614_.c:107:10:MLX90614_read_reg	136	static
+mlx90614_.c:150:6:MLX90614_read_temp	32	static
+mlx90614_.c:164:6:MLX90614_temp_compensation	80	static
+mlx90614_.c:197:7:MLX90614_get_current_temp	24	static
+mlx90614_.c:209:7:MLX90614_get_comp_temp	24	static
+mlx90614_.c:221:6:MLX90614_debug_mode	16	static
+mlx90614_.c:304:6:MLX90614_flash_mode	16	static

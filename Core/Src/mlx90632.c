@@ -1,416 +1,348 @@
 /*
- * mlx90632.c
+ * mlx90632_.c
  *
- *  Created on: Apr 4, 2022
+ *  Created on: Jun 7, 2022
  *      Author: falls
  */
-
-#include <stdint.h>
-#include <math.h>
-#include <errno.h>
-
-#include "mlx90632.h"
-#include "mlx90632_depends.h"
+#include <mlx90632.h>
 
 #define POW10 10000000000LL
 
-#ifndef VERSION
-#define VERSION "test"
-#endif
-
-static const char mlx90632version[] __attribute__((used)) = { VERSION };
-
-#ifndef STATIC
-#define STATIC static
-#endif
-
-int mlx90632_start_measurement(I2C_HandleTypeDef hi2c)
+void MLX90632_ctor(
+    MLX90632* const me,
+    I2C_HandleTypeDef* hi2c,
+    uint16_t address
+)
 {
-    int ret, tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
-    uint16_t reg_status;
+    MLX_Device_ctor(
+        &me->super_device,
+        hi2c,
+        address
+    );
 
-    ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status, hi2c);
-    if (ret < 0) {
-    	  return ret;
-    }
+    me->PR = 0x00587f5b;
 
+    me->PG = 0x04a10289;
 
-    ret = mlx90632_i2c_write(MLX90632_REG_STATUS, reg_status & (~MLX90632_STAT_DATA_RDY), hi2c);
-    if (ret < 0){
-  	  return ret;
-  }
+    me->PT = 0xfff966f8;
 
-    while (tries-- > 0)
-    {
-        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status, hi2c);
-        if (ret < 0)
-            return ret;
-        if (reg_status & MLX90632_STAT_DATA_RDY)
-            break;
-        /* minimum wait time to complete measurement
-         * should be calculated according to refresh rate
-         * atm 10ms - 11ms
-         */
-        usleep(10000, 11000);
-    }
+    me->PO = 0x00001e0f;
 
-    if (tries < 0)
-    {
-        // data not ready
-        return -ETIMEDOUT;
-    }
+    me->Ea = 4859535;
 
-    return (reg_status & MLX90632_STAT_CYCLE_POS) >> 2;
+    me->Eb = 5686508;
+
+    me->Fa = 53855361;
+
+    me->Fb = 42874149;
+
+    me->Ga = -14556410;
+
+    me->Gb = 9728;
+
+    me->Ha = 16384;
+
+    me->Hb = 0;
+
+    me->Ka = 10752;
 }
 
-/** 
- * @brief Based on @link mlx90632_start_measurement @endlink return value fill channel_new and channel_old
- * variables with proper values. This is to provide a bit more flexibility in case other channels are
- * returned and need a bit more mingeling than usual maths can provide.
- *
- * So far there are just two use cases. If returned value is not 1 or 2, it will leave channel_new
- * and channel_old unassigned.
- *
- * @param[in] ret @link mlx90632_start_measurement @endlink return value
- * @param[out] *channel_new Pointer to memory location where new channel value is stored
- * @param[out] *channel_old Pointer to memory location where old channel value is stored
- *
- * @retval 0 When both memory locations are updated as per ret
- * @retval -EINVAL channel_new and channel_old were not updated
- */
-STATIC int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, uint8_t *channel_old)
+int MLX90632_read_eeprom(
+    MLX90632* const me
+)
 {
-    switch (ret)
-    {
-        case 1:
-            *channel_new = 1;
-            *channel_old = 2;
-            break;
+    int32_t ret;
 
-        case 2:
-            *channel_new = 2;
-            *channel_old = 1;
-            break;
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_P_R,
+        &me->PR
+    );
 
-        default:
-            return -EINVAL;
-    }
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_P_G,
+        &me->PG
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_P_O,
+        &me->PO
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_P_T,
+        &me->PT
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Ea,
+        &me->Ea
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Eb,
+        &me->Eb
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Fa,
+        &me->Fa
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Fb,
+        &me->Fb
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Ga,
+        &me->Ga
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Gb,
+        &me->Gb
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Ha,
+        &me->Ha
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Hb,
+        &me->Hb
+    );
+
+    if(ret < 0)
+        return ret;
+
+    ret = MLX90632_i2c_read32(
+        me,
+        MLX90632_EE_Ka,
+        &me->Ka
+    );
+
+    if(ret < 0)
+        return ret;
+
     return 0;
 }
 
-/** 
- * @brief Read ambient raw old and new values based on @link mlx90632_start_measurement @endlink return value.
- *
- * Two i2c_reads are needed to obtain necessary raw ambient values from the sensor, as they are then
- * preprocessed before going to calculation functions. Because one value is newer than other (see @link
- * mlx90632_start_measurement @endlink) this function provides dynamics based on return value of the
- * @link mlx90632_start_measurement @endlink.
- *
- * @param[out] *ambient_new_raw Pointer to memory location where new ambient value from sensor is stored
- * @param[out] *ambient_old_raw Pointer to memory location where old ambient value from sensor is stored
- *
- * @retval 0 Successfully read both values
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
-STATIC int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw, I2C_HandleTypeDef hi2c)
+int32_t MLX90632_set_meas_type(
+    MLX90632* const me,
+    uint8_t type
+)
 {
     int32_t ret;
-    uint16_t read_tmp;
+    uint16_t reg_ctrl;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_3(1), &read_tmp, hi2c);
-    if (ret < 0)
-        return ret;
-    *ambient_new_raw = (int16_t)read_tmp;
-
-    ret = mlx90632_i2c_read(MLX90632_RAM_3(2), &read_tmp, hi2c);
-    if (ret < 0)
-        return ret;
-    *ambient_old_raw = (int16_t)read_tmp;
-
-    return ret;
-}
-
-/** 
- * @brief Read object raw old and new values based on @link mlx90632_start_measurement @endlink return value.
- *
- * Four i2c_reads are needed to obtain necessary raw object values from the sensor. These values are grouped per new
- * and old and then averaged before return of the function. After that they are then preprocessed before going to
- * calculation functions. Because one value is newer than other (see @link mlx90632_start_measurement @endlink) this
- * function provides dynamics based on return value of the @link mlx90632_start_measurement @endlink.
- *
- * @param[in] start_measurement_ret Return value of @link mlx90632_start_measurement @endlink
- * @param[out] *object_new_raw Pointer to memory location where average of new object values from sensor is stored
- * @param[out] *object_old_raw Pointer to memory location where average of old object values from sensor is stored
- *
- * @retval 0 Successfully read both values
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
-STATIC int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
-                                             int16_t *object_new_raw, int16_t *object_old_raw, I2C_HandleTypeDef hi2c)
-{
-    int32_t ret;
-    uint16_t read_tmp;
-    int16_t read;
-    uint8_t channel, channel_old;
-
-    ret = mlx90632_channel_new_select(start_measurement_ret, &channel, &channel_old);
-    if (ret != 0)
+    if (
+        (type != MLX90632_MTYP_MEDICAL) &
+        (type != MLX90632_MTYP_EXTENDED) &
+        (type != MLX90632_MTYP_MEDICAL_BURST) &
+        (type != MLX90632_MTYP_EXTENDED_BURST)
+    )
         return -EINVAL;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_2(channel), &read_tmp, hi2c);
+    ret = MLX90632_addressed_reset(me);
     if (ret < 0)
         return ret;
 
-    read = (int16_t)read_tmp;
-
-    ret = mlx90632_i2c_read(MLX90632_RAM_1(channel), &read_tmp, hi2c);
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_REG_CTRL,
+        &reg_ctrl
+    );
     if (ret < 0)
         return ret;
-    *object_new_raw = (read + (int16_t)read_tmp) / 2;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_2(channel_old), &read_tmp, hi2c);
+    reg_ctrl = reg_ctrl & (~MLX90632_CFG_MTYP_MASK & ~MLX90632_CFG_PWR_MASK);
+    reg_ctrl |= (MLX90632_MTYP_STATUS(MLX90632_MEASUREMENT_TYPE_STATUS(type)) | MLX90632_PWR_STATUS_HALT);
+
+    ret = MLX90632_i2c_write(
+        me,
+        MLX90632_REG_CTRL,
+        reg_ctrl
+    );
     if (ret < 0)
         return ret;
-    read = (int16_t)read_tmp;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_1(channel_old), &read_tmp, hi2c);
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_REG_CTRL,
+        &reg_ctrl
+    );
     if (ret < 0)
         return ret;
-    *object_old_raw = (read + (int16_t)read_tmp) / 2;
+
+    reg_ctrl = reg_ctrl & ~MLX90632_CFG_PWR_MASK;
+    if (MLX90632_MEASUREMENT_BURST_STATUS(type)) {
+        reg_ctrl |= MLX90632_PWR_STATUS_SLEEP_STEP;
+    } else {
+        reg_ctrl |= MLX90632_PWR_STATUS_CONTINUOUS;
+    }
+
+    ret = MLX90632_i2c_write(
+        me,
+        MLX90632_REG_CTRL, reg_ctrl
+    );
 
     return ret;
 }
 
-int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
-                               int16_t *object_new_raw, int16_t *object_old_raw, I2C_HandleTypeDef hi2c)
+void MLX90632_set_emissivity(
+    MLX90632* const me,
+    double emissivity
+)
+{
+    me->emissivity = emissivity;
+}
+
+double MLX90632_get_emissivity(
+    MLX90632* const me
+)
+{
+    return me->emissivity;
+}
+
+int32_t MLX90632_read_temp_raw_extended(
+    MLX90632* const me
+)
 {
     int32_t ret, start_measurement_ret;
+    int tries = 3;
 
-    // trigger and wait for measurement to complete
-    start_measurement_ret = mlx90632_start_measurement(hi2c);
-    if (start_measurement_ret < 0)
-        return start_measurement_ret;
+    while (tries --> 0)
+    {
+        start_measurement_ret = MLX90632_start_measurement(me);
 
-    /** Read new and old **ambient** values from sensor */
-    ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw, hi2c);
+        if (start_measurement_ret < 0)
+            return start_measurement_ret;
+
+        if (start_measurement_ret == 19)
+            break;
+    }
+
+    ret = MLX90632_read_temp_raw_extended(me);
+
     if (ret < 0)
         return ret;
 
-    /** Read new and old **object** values from sensor */
-    ret = mlx90632_read_temp_object_raw(start_measurement_ret, object_new_raw, object_old_raw, hi2c);
+    ret = MLX90632_read_temp_object_raw_extended(
+        me
+    );
 
     return ret;
 }
 
-int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
-                                     int16_t *object_new_raw, int16_t *object_old_raw, I2C_HandleTypeDef hi2c)
-{
-    int32_t ret, start_measurement_ret;
-
-    // trigger and wait for measurement to complete
-    start_measurement_ret = mlx90632_start_measurement_burst(hi2c);
-    if (start_measurement_ret < 0)
-        return start_measurement_ret;
-
-    /** Read new and old **ambient** values from sensor */
-    ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw, hi2c);
-    if (ret < 0)
-        return ret;
-
-    /** Read new and old **object** values from sensor */
-    ret = mlx90632_read_temp_object_raw(2, object_new_raw, object_old_raw, hi2c);
-
-    return ret;
-}
-
-
-/* DSPv5 */
-double mlx90632_preprocess_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_raw, int16_t Gb)
-{
-    double VR_Ta, kGb;
-
-    kGb = ((double)Gb) / 1024.0;
-
-    VR_Ta = ambient_old_raw + kGb * (ambient_new_raw / (MLX90632_REF_3));
-    return ((ambient_new_raw / (MLX90632_REF_3)) / VR_Ta) * 524288.0;
-}
-
-double mlx90632_preprocess_temp_object(int16_t object_new_raw, int16_t object_old_raw,
-                                       int16_t ambient_new_raw, int16_t ambient_old_raw,
-                                       int16_t Ka)
-{
-    double VR_IR, kKa;
-
-    kKa = ((double)Ka) / 1024.0;
-
-    VR_IR = ambient_old_raw + kKa * (ambient_new_raw / (MLX90632_REF_3));
-    return ((((object_new_raw + object_old_raw) / 2) / (MLX90632_REF_12)) / VR_IR) * 524288.0;
-}
-
-double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_raw, int32_t P_T,
-                                  int32_t P_R, int32_t P_G, int32_t P_O, int16_t Gb)
+void MLX90632_calc_temp_ambient_extended(
+    MLX90632* const me
+)
 {
     double Asub, Bsub, Ablock, Bblock, Cblock, AMB;
 
-    AMB = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
+    MLX90632_preprocess_temp_ambient_extended(me);
 
-    Asub = ((double)P_T) / (double)17592186044416.0;
-    Bsub = (double)AMB - ((double)P_R / (double)256.0);
+    AMB = me->pre_ambient;
+
+    Asub = ((double)me->PT) / (double)17592186044416.0;
+    Bsub = AMB - ((double)me->PR / (double)256.0);
     Ablock = Asub * (Bsub * Bsub);
-    Bblock = (Bsub / (double)P_G) * (double)1048576.0;
-    Cblock = (double)P_O / (double)256.0;
+    Bblock = (Bsub / (double)me->PG) * (double)1048576.0;
+    Cblock = (double)me->PO / (double)256.0;
 
-    return Bblock + Ablock + Cblock;
+    me->ambient = Bblock + Ablock + Cblock;
 }
 
-/** 
- * @brief Iterative calculation of object temperature
- *
- * DSPv5 requires 3 iterations to reduce noise for object temperature. Since
- * each iteration requires same calculations this helper function is
- * implemented.
- *
- * @param[in] prev_object_temp previously calculated object temperature. If
- *                              there is no previously calculated temperature
- *                              input 25.0
- * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
- * @param[in] TAdut ambient temperature coefficient
- * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
- * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
- * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
- * @param[in] Ha Register value on @link MLX90632_EE_Ha @endlink
- * @param[in] Hb Register value on @link MLX90632_EE_Hb @endlink
- * @param[in] emissivity Value provided by user of the object emissivity
- *
- * @return Calculated object temperature for current iteration in milliCelsius
- */
-STATIC double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32_t object, double TAdut,
-                                                  int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
-                                                  double emissivity)
+void MLX90632_preprocess_temp_ambient_extended(
+    MLX90632* const me
+)
 {
-    double calcedGa, calcedGb, calcedFa, TAdut4, first_sqrt;
-    // temp variables
-    double KsTAtmp, Alpha_corr;
-    double Ha_customer, Hb_customer;
+    double VR_Ta, kGb;
 
+    kGb = ((double)me->Gb) / 1024.0;
 
-    Ha_customer = Ha / ((double)16384.0);
-    Hb_customer = Hb / ((double)1024.0);
-    calcedGa = ((double)Ga * (prev_object_temp - 25)) / ((double)68719476736.0);
-    KsTAtmp = (double)Fb * (TAdut - 25);
-    calcedGb = KsTAtmp / ((double)68719476736.0);
-    Alpha_corr = (((double)(Fa * POW10)) * Ha_customer * (double)(1 + calcedGa + calcedGb)) /
-                 ((double)70368744177664.0);
-    calcedFa = object / (emissivity * (Alpha_corr / POW10));
-    TAdut4 = (TAdut + 273.15) * (TAdut + 273.15) * (TAdut + 273.15) * (TAdut + 273.15);
+    VR_Ta = me->ambient_old_raw + kGb *
+        (me->ambient_new_raw / (MLX90632_REF_3));
 
-    first_sqrt = sqrt(calcedFa + TAdut4);
-
-    return sqrt(first_sqrt) - 273.15 - Hb_customer;
+    me->pre_ambient = ((me->ambient_new_raw / (MLX90632_REF_3)) / VR_Ta) * 524288.0;
 }
 
-/** 
- * @brief Iterative calculation of object temperature  when the environment temperature differs from the sensor temperature
- *
- * DSPv5 requires 3 iterations to reduce noise for object temperature. Since
- * each iteration requires same calculations this helper function is
- * implemented.
- *
- * @param[in] prev_object_temp previously calculated object temperature. If
- *                              there is no previously calculated temperature
- *                              input 25.0
- * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
- * @param[in] TAdut ambient temperature coefficient
- * @param[in] TaTr4 compensation coefficient for reflected (environment) temperature. The compensation
- *                  coefficient is calculated from ambient temperature either from a sensor different than the MLX90632 or
- *                  acquired by other means.
- * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
- * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
- * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
- * @param[in] Ha Register value on @link MLX90632_EE_Ha @endlink
- * @param[in] Hb Register value on @link MLX90632_EE_Hb @endlink
- * @param[in] emissivity Value provided by user of the object emissivity
- *
- * @return Calculated object temperature for current iteration in milliCelsius
- */
-STATIC double mlx90632_calc_temp_object_iteration_reflected(double prev_object_temp, int32_t object, double TAdut, double TaTr4,
-                                                            int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
-                                                            double emissivity)
+void MLX90632_preprocess_temp_object_extended(
+    MLX90632* const me
+)
 {
-    double calcedGa, calcedGb, calcedFa, first_sqrt;
-    // temp variables
-    double KsTAtmp, Alpha_corr;
-    double Ha_customer, Hb_customer;
+    double VR_IR, kKa;
 
-    Ha_customer = Ha / ((double)16384.0);
-    Hb_customer = Hb / ((double)1024.0);
-    calcedGa = ((double)Ga * (prev_object_temp - 25)) / ((double)68719476736.0);
-    KsTAtmp = (double)Fb * (TAdut - 25);
-    calcedGb = KsTAtmp / ((double)68719476736.0);
-    Alpha_corr = (((double)(Fa * POW10)) * Ha_customer * (double)(1 + calcedGa + calcedGb)) /
-                 ((double)70368744177664.0);
-    calcedFa = object / (emissivity * (Alpha_corr / POW10));
+    kKa = ((double)me->Ka) / 1024.0;
 
-    first_sqrt = sqrt(calcedFa + TaTr4);
+    VR_IR = me->ambient_old_raw + kKa *
+        (me->ambient_new_raw / (MLX90632_REF_3));
 
-    return sqrt(first_sqrt) - 273.15 - Hb_customer;
+    me->pre_object = ((me->object_new_raw / (MLX90632_REF_12)) / VR_IR) * 524288.0;
 }
 
-static double emissivity = 0.0;
-void mlx90632_set_emissivity(double value)
-{
-    emissivity = value;
-}
-
-double mlx90632_get_emissivity(void)
-{
-    if (emissivity == 0.0)
-    {
-        return 1.0;
-    }
-    else
-    {
-        return emissivity;
-    }
-}
-
-double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
-                                 int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
-                                 int16_t Ha, int16_t Hb)
+void MLX90632_calc_temp_object_extended(
+    MLX90632* const me
+)
 {
     double kEa, kEb, TAdut;
     double temp = 25.0;
-    double tmp_emi = mlx90632_get_emissivity();
-    int8_t i;
-
-    kEa = ((double)Ea) / ((double)65536.0);
-    kEb = ((double)Eb) / ((double)256.0);
-    TAdut = (((double)ambient) - kEb) / kEa + 25;
-
-    //iterate through calculations
-    for (i = 0; i < 5; ++i)
-    {
-        temp = mlx90632_calc_temp_object_iteration(temp, object, TAdut, Ga, Fa, Fb, Ha, Hb, tmp_emi);
-    }
-    return temp;
-}
-
-double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, double reflected,
-                                           int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
-                                           int16_t Ha, int16_t Hb)
-{
-    double kEa, kEb, TAdut;
-    double temp = 25.0;
-    double tmp_emi = mlx90632_get_emissivity();
+    double tmp_emi = MLX90632_get_emissivity(me);
     double TaTr4;
     double ta4;
     int8_t i;
 
-    kEa = ((double)Ea) / ((double)65536.0);
-    kEb = ((double)Eb) / ((double)256.0);
-    TAdut = (((double)ambient) - kEb) / kEa + 25;
+    kEa = ((double)me->Ea) / ((double)65536.0);
+    kEb = ((double)me->Eb) / ((double)256.0);
+    TAdut = (((double)me->ambient) - kEb) / kEa + 25;
 
-    TaTr4 = reflected + 273.15;
+    TaTr4 = me->ambient + 273.15;
     TaTr4 = TaTr4 * TaTr4;
     TaTr4 = TaTr4 * TaTr4;
     ta4 = TAdut + 273.15;
@@ -420,275 +352,561 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
 
     //iterate through calculations
     for (i = 0; i < 5; ++i)
-    {
-        temp = mlx90632_calc_temp_object_iteration_reflected(temp, object, TAdut, TaTr4, Ga, Fa, Fb, Ha, Hb, tmp_emi);
-    }
+        temp = MLX90632_calc_temp_object_iteration_extended(
+            me, temp, TAdut, TaTr4, tmp_emi
+        );
+
     return temp;
 }
 
-int32_t mlx90632_init(I2C_HandleTypeDef hi2c)
+int32_t MLX90632_i2c_read(
+    MLX90632* const me,
+    int16_t register_address,
+    uint16_t* value
+)
 {
+    uint8_t data[2];
     int32_t ret;
-    uint16_t eeprom_version, reg_status;
 
-    ret = mlx90632_i2c_read(MLX90632_EE_VERSION, &eeprom_version, hi2c);
-    if (ret < 0)
-    {
-        return ret;
-    }
+	uint16_t devAddr;
+	I2C_HandleTypeDef hi2c;
 
-    if ((eeprom_version & 0x00FF) != MLX90632_DSPv5)
-    {
-        // this here can fail because of big/little endian of cpu/i2c
-        return -EPROTONOSUPPORT;
-    }
+	MLX_Device_get_address(&me->super_device, &devAddr);
+	MLX_Device_get_hi2c(&me->super_device, &hi2c);
 
-    ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status, hi2c);
-    if (ret < 0)
-        return ret;
-
-    // Prepare a clean start with setting NEW_DATA to 0
-    ret = mlx90632_i2c_write(MLX90632_REG_STATUS, reg_status & ~(MLX90632_STAT_DATA_RDY), hi2c);
-    if (ret < 0)
-        return ret;
-
-    if ((eeprom_version & 0x7F00) == MLX90632_XTD_RNG_KEY)
-    {
-        return ERANGE;
-    }
-
-    return 0;
+    ret = HAL_I2C_Mem_Read(
+        &hi2c,
+        devAddr,
+        register_address,
+        2,
+        data,
+        sizeof(data),
+        100
+    );
+    *value = data[1]|(data[0]<<8);
+    return ret;
 }
 
-int32_t mlx90632_addressed_reset(I2C_HandleTypeDef hi2c)
+int32_t MLX90632_i2c_read32(
+    MLX90632* const me,
+    int16_t register_address,
+    uint32_t* value
+)
+{
+    uint8_t data[4];
+    int32_t ret;
+
+	uint16_t devAddr;
+	I2C_HandleTypeDef hi2c;
+
+	MLX_Device_get_address(&me->super_device, &devAddr);
+	MLX_Device_get_hi2c(&me->super_device, &hi2c);
+
+    ret = HAL_I2C_Mem_Read(
+        &hi2c,
+        devAddr,
+        register_address,
+        2,
+        data,
+        sizeof(data),
+        100
+    );
+    *value = data[2]<<24|data[3]<<16|data[0]<<8|data[1];
+    return ret;
+}
+
+int32_t MLX90632_i2c_write(
+    MLX90632* const me,
+    int16_t register_address,
+    uint16_t value
+)
+{
+    uint8_t data[2];
+
+	uint16_t devAddr;
+	I2C_HandleTypeDef hi2c;
+
+	MLX_Device_get_address(&me->super_device, &devAddr);
+	MLX_Device_get_hi2c(&me->super_device, &hi2c);
+
+    data[0] = value >> 8;
+    data[1] = value;
+    return HAL_I2C_Mem_Write(
+        &hi2c,
+        devAddr,
+        register_address,
+        2,
+        data,
+        2,
+        100
+    );
+}
+
+int32_t MLX90632_addressed_reset(
+    MLX90632* const me
+)
 {
     int32_t ret;
     uint16_t reg_ctrl;
     uint16_t reg_value;
 
-    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg_value, hi2c);
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_REG_CTRL,
+        &reg_value
+    );
 //    if (ret < 0)
 //        return ret;
 
     reg_ctrl = reg_value & ~MLX90632_CFG_PWR_MASK;
     reg_ctrl |= MLX90632_PWR_STATUS_STEP;
-    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl, hi2c);
+    ret = MLX90632_i2c_write(
+        me,
+        MLX90632_REG_CTRL,
+        reg_ctrl
+    );
     if (ret < 0)
         return ret;
 
-    ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD, hi2c);
+    ret = MLX90632_i2c_write(
+        me,
+        0x3005,
+        MLX90632_RESET_CMD
+    );
 //    if (ret < 0)
 //        return ret;
 
     usleep(150, 200);
 
-    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_value, hi2c);
+    ret = MLX90632_i2c_write(
+        me,
+        MLX90632_REG_CTRL, reg_value
+    );
 
     return ret;
 }
 
-int32_t mlx90632_get_measurement_time(uint16_t meas, I2C_HandleTypeDef hi2c)
+int MLX90632_start_measurement(
+    MLX90632* const me
+)
 {
-    int32_t ret;
-    uint16_t reg;
+    int ret, tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
+    uint16_t reg_status;
 
-    ret = mlx90632_i2c_read(meas, &reg, hi2c);
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_REG_STATUS,
+        &reg_status
+    );
+
     if (ret < 0)
         return ret;
 
-    reg &= MLX90632_EE_REFRESH_RATE_MASK;
-    reg = reg >> 8;
+    ret = MLX90632_i2c_write(
+        me,
+        MLX90632_REG_STATUS,
+        reg_status & (~MLX90632_STAT_DATA_RDY)
+    );
 
-    return MLX90632_MEAS_MAX_TIME >> reg;
-}
-
-int32_t mlx90632_calculate_dataset_ready_time(I2C_HandleTypeDef hi2c)
-{
-    int32_t ret;
-    int32_t refresh_time;
-
-    ret = mlx90632_get_meas_type(hi2c);
     if (ret < 0)
         return ret;
 
-    if ((ret != MLX90632_MTYP_MEDICAL_BURST) && (ret != MLX90632_MTYP_EXTENDED_BURST))
-        return -EINVAL;
-
-    if (ret == MLX90632_MTYP_MEDICAL_BURST)
+    while (tries --> 0)
     {
-        ret = mlx90632_get_measurement_time(MLX90632_EE_MEDICAL_MEAS1, hi2c);
+        ret = MLX90632_i2c_read32(
+            me,
+            MLX90632_REG_STATUS,
+            &reg_status
+        );
+
         if (ret < 0)
             return ret;
-
-        refresh_time = ret;
-
-        ret = mlx90632_get_measurement_time(MLX90632_EE_MEDICAL_MEAS2, hi2c);
-        if (ret < 0)
-            return ret;
-
-        refresh_time = refresh_time + ret;
-    }
-    else
-    {
-        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS1, hi2c);
-        if (ret < 0)
-            return ret;
-
-        refresh_time = ret;
-
-        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS2, hi2c);
-        if (ret < 0)
-            return ret;
-
-        refresh_time = refresh_time + ret;
-
-        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS3, hi2c);
-        if (ret < 0)
-            return ret;
-
-        refresh_time = refresh_time + ret;
-    }
-
-    return refresh_time;
-}
-
-int32_t mlx90632_start_measurement_burst(I2C_HandleTypeDef hi2c)
-{
-    int32_t ret;
-    int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
-    uint16_t reg;
-
-    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg, hi2c);
-    if (ret < 0)
-        return ret;
-
-    reg |= MLX90632_START_BURST_MEAS;
-
-    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg, hi2c);
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_calculate_dataset_ready_time(hi2c);
-    if (ret < 0)
-        return ret;
-//    msleep(ret); /* Waiting for refresh of all the measurement tables */
-    HAL_Delay(ret);
-
-    while (tries-- > 0)
-    {
-        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg, hi2c);
-        if (ret < 0)
-            return ret;
-        if ((reg & MLX90632_STAT_BUSY) == 0)
+        if (reg_status && MLX90632_STAT_DATA_RDY)
             break;
-        /* minimum wait time to complete measurement
-         * should be calculated according to refresh rate
-         * atm 10ms - 11ms
-         */
+
         usleep(10000, 11000);
     }
 
     if (tries < 0)
-    {
-        // data not ready
         return -ETIMEDOUT;
-    }
 
-    return 0;
+    return (reg_status & MLX90632_STAT_CYCLE_POS) >> 2;
 }
 
-
-STATIC int32_t mlx90632_unlock_eeporm(I2C_HandleTypeDef hi2c)
-{
-    return mlx90632_i2c_write(0x3005, MLX90632_EEPROM_WRITE_KEY, hi2c);
-}
-
-STATIC int32_t mlx90632_wait_for_eeprom_not_busy(I2C_HandleTypeDef hi2c)
-{
-    uint16_t reg_status;
-    int32_t ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status, hi2c);
-
-    while (ret >= 0 && reg_status & MLX90632_STAT_EE_BUSY)
-    {
-        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status, hi2c);
-    }
-
-    return ret;
-}
-
-STATIC int32_t mlx90632_erase_eeprom(uint16_t address, I2C_HandleTypeDef hi2c)
-{
-    int32_t ret = mlx90632_unlock_eeporm(hi2c);
-
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_i2c_write(address, 0x00, hi2c);
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_wait_for_eeprom_not_busy(hi2c);
-    return ret;
-}
-
-STATIC int32_t mlx90632_write_eeprom(uint16_t address, uint16_t data, I2C_HandleTypeDef hi2c)
-{
-    int32_t ret = mlx90632_erase_eeprom(address, hi2c);
-
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_unlock_eeporm(hi2c);
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_i2c_write(address, data, hi2c);
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_wait_for_eeprom_not_busy(hi2c);
-    return ret;
-}
-
-int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate, I2C_HandleTypeDef hi2c)
-{
-    uint16_t meas1, meas2;
-
-    int32_t ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS1, &meas1, hi2c);
-
-    if (ret < 0)
-        return ret;
-
-    uint16_t new_value = MLX90632_NEW_REG_VALUE(meas1, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
-
-    if (meas1 != new_value)
-    {
-        ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS1, new_value, hi2c);
-        if (ret < 0)
-            return ret;
-    }
-
-    ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS2, &meas2, hi2c);
-    if (ret < 0)
-        return ret;
-
-    new_value = MLX90632_NEW_REG_VALUE(meas2, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
-    if (meas2 != new_value)
-    {
-        ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS2, new_value, hi2c);
-    }
-
-    return ret;
-}
-
-mlx90632_meas_t mlx90632_get_refresh_rate(I2C_HandleTypeDef hi2c)
+int32_t MLX90632_read_temp_ambient_raw_extended(
+    MLX90632* const me
+)
 {
     int32_t ret;
-    uint16_t meas1;
+    uint16_t read_temp;
 
-    ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS1, &meas1, hi2c);
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_3(17),
+        &read_temp
+    );
+
     if (ret < 0)
-        return MLX90632_MEAS_HZ_ERROR;
+        return ret;
 
-    return (mlx90632_meas_t)MLX90632_REFRESH_RATE(meas1);
+    me->ambient_new_raw = (int16_t)read_temp;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_3(18),
+        &read_temp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    me->ambient_old_raw = (int16_t)read_temp;
+
+    return ret;
 }
+
+int32_t mlx90632_read_temp_object_raw_extended(
+    MLX90632* const me
+)
+{
+    int32_t ret;
+    uint16_t read_tmp;
+    int32_t read;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_1(17),
+        &read_tmp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    read = (int16_t)read_tmp;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_2(17),
+        &read_tmp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    read = read - (int16_t)read_tmp;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_1(18),
+        &read_tmp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    read = read - (int16_t)read_tmp;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_2(18),
+        &read_tmp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    read = (read + (int16_t)read_tmp) / 2;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_1(19),
+        &read_tmp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    read = read + (int16_t)read_tmp;
+
+    ret = MLX90632_i2c_read(
+        me,
+        MLX90632_RAM_2(19),
+        &read_tmp
+    );
+
+    if (ret < 0)
+        return ret;
+
+    read = read + (int16_t)read_tmp;
+
+    if (read > 32767 || read < -32768)
+        return -EINVAL;
+
+    me->object_new_raw = (int16_t)read;
+
+    return ret;
+}
+
+double mlx90632_preprocess_temp_ambient_extended(
+    MLX90632* const me
+)
+{
+    double VR_Ta, kGb;
+
+    kGb = ((double)me->Gb) / 1024.0;
+
+    VR_Ta = me->ambient_old_raw + kGb *
+        (me->ambient_new_raw / (MLX90632_REF_3));
+    return ((me->ambient_new_raw / (MLX90632_REF_3)) / VR_Ta) * 524288.0;
+}
+
+double MLX90632_calc_temp_object_iteration_extended(
+    MLX90632* const me,
+    double prev_object_temp,
+    double TAdut,
+    double TaTr4,
+    double emissivity
+)
+{
+    double calcedGa, calcedGb, calcedFa, first_sqrt;
+    // temp variables
+    double KsTAtmp, Alpha_corr;
+    double Ha_customer, Hb_customer;
+
+    Ha_customer = me->Ha / ((double)16384.0);
+    Hb_customer = me->Hb / ((double)1024.0);
+    calcedGa = ((double)me->Ga * (prev_object_temp - 25)) / ((double)68719476736.0);
+    KsTAtmp = (double)me->Fb * (TAdut - 25);
+    calcedGb = KsTAtmp / ((double)68719476736.0);
+    Alpha_corr = (((double)((me->Fa / 2) * POW10)) * Ha_customer * (double)(1.0 + calcedGa + calcedGb)) /
+                 ((double)70368744177664.0);
+    calcedFa = me->object / (emissivity * (Alpha_corr / POW10));
+
+    first_sqrt = sqrt(calcedFa + TaTr4);
+
+    return sqrt(first_sqrt) - 273.15 - Hb_customer;
+}
+
+double mlx90632_calc_temp_object(
+	MLX90632* const me
+)
+{
+    double kEa, kEb, TAdut;
+    double temp = 25.0;
+    double tmp_emi = mlx90632_get_emissivity();
+    int8_t i;
+
+    kEa = ((double)me->Ea) / ((double)65536.0);
+    kEb = ((double)me->Eb) / ((double)256.0);
+    TAdut = (((double)me->ambient) - kEb) / kEa + 25;
+
+    //iterate through calculations
+    for (i = 0; i < 5; ++i)
+        temp = mlx90632_calc_temp_object_iteration(temp, object, TAdut, Ga, Fa, Fb, Ha, Hb, tmp_emi);
+
+    return temp;
+}
+
+void MLX90632_preprocess_temp_ambient(
+	MLX90632* const me
+)
+{
+    double VR_Ta, kGb;
+
+    kGb = ((double)me->Gb) / 1024.0;
+
+    VR_Ta = me->ambient_old_raw + kGb * (me->ambient_new_raw / (MLX90632_REF_3));
+
+    me->ambient = ((me->ambient_new_raw / (MLX90632_REF_3)) / VR_Ta) * 524288.0;
+}
+
+void MLX90632_standard_mode_measure(
+		MLX90632* const me,
+		double* output
+)
+{
+	HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+	if (result != HAL_OK) {
+		*output = -273.3;
+		return;
+	}
+
+//	mlx90632_set_meas_type(MLX90632_MTYP_MEDICAL, hi2c1);
+
+    MLX90632_read_eeprom(me);
+
+	MLX90632_read_temp_raw(me);
+
+	pre_ambient = MLX90632_preprocess_temp_ambient(me);
+	pre_object = MLX90632_preprocess_temp_object(me);
+
+	MLX90632_set_emissivity(1);
+
+	MLX90632_calc_temp_ambient(me);
+
+	object = MLX90632_calc_temp_object(me);
+
+	float_temp_to_char_temp(object, char_temp_1);
+}
+
+void MLX90632_extended_mode_measure()
+{
+	HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+	if (result == HAL_OK) {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	} else {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	}
+
+    mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED, hi2c1);
+
+    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
+
+    while(1)
+    {
+    	mlx90632_set_emissivity(0.5);
+
+    	mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
+
+        ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
+                                                      PT, PR, PG, PO, Gb);
+
+        pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+                                                                       ambient_old_raw, Gb);
+        pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+                                                                     ambient_old_raw, Ka);
+
+        object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+        float_temp_1 = object;
+        float_temp_to_char_temp(float_temp_1, char_temp_1);
+
+        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
+        {
+#	        ifdef SSD1306_DISPLAY
+            SSD1306_GotoXY(0, 0);
+            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+            SSD1306_GotoXY(70, 0);
+            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	        endif
+
+#		    ifdef USB_SEND
+            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+            CDC_Transmit_FS(end, strlen(end));
+
+//            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+//            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+//            CDC_Transmit_FS(end, strlen(end));
+#  		    endif
+        }
+
+#       ifdef SSD1306_DISPLAY
+        SSD1306_GotoXY(0, 29);
+        SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+        SSD1306_GotoXY(70, 29);
+        SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+        SSD1306_UpdateScreen();
+#       endif
+    }
+}
+
+void MLX90632_extended_burst_mode_measure()
+{
+	HAL_StatusTypeDef result = HAL_I2C_IsDeviceReady(&hi2c1, 0x3a << 1, 1, 100);
+	if (result == HAL_OK) {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	} else {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	}
+
+    mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED_BURST, hi2c1);
+
+    mlx90632_read_eeprom(&PR, &PG, &PO, &PT, &Ea, &Eb, &Fa, &Fb, &Ga, &Gb, &Ha, &Hb, &Ka, hi2c1);
+
+    while(1)
+    {
+    	mlx90632_set_emissivity(1);
+
+        mlx90632_read_temp_raw_extended_burst(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c1);
+
+        ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
+                                                      PT, PR, PG, PO, Gb);
+
+        pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+                                                                       ambient_old_raw, Gb);
+        pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+                                                                     ambient_old_raw, Ka);
+
+        object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+
+        float_temp_1 = object;
+        float_temp_to_char_temp(float_temp_1, char_temp_1);
+
+        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
+        {
+#	        ifdef SSD1306_DISPLAY
+            SSD1306_GotoXY(0, 0);
+            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+            SSD1306_GotoXY(70, 0);
+            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	        endif
+
+#		    ifdef USB_SEND
+            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+            CDC_Transmit_FS(end, strlen(end));
+
+            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+            CDC_Transmit_FS(end, strlen(end));
+#  		    endif
+        }
+
+#       ifdef SSD1306_DISPLAY
+        SSD1306_GotoXY(0, 29);
+        SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+        SSD1306_GotoXY(70, 29);
+        SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+
+        SSD1306_UpdateScreen();
+#       endif
+    }
+}
+
+
+
+
+
+
+
+

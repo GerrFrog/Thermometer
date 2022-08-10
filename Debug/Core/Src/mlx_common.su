@@ -1,2 +1,7 @@
-mlx_common.c:18:9:CRC8_Calc	24	static
-mlx_common.c:36:5:ScanDevices	16	static
+mlx_common.c:9:6:MLX_Device_ctor	24	static
+mlx_common.c:18:6:MLX_Device_get_current_temp	16	static
+mlx_common.c:26:6:MLX_Device_get_comp_temp	16	static
+mlx_common.c:34:6:MLX_Device_get_hi2c	16	static
+mlx_common.c:42:6:MLX_Device_get_address	16	static
+mlx_common.c:50:6:MLX_Device_set_current_temp	16	static
+mlx_common.c:58:6:MLX_Device_set_comp_temp	16	static

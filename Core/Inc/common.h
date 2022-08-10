@@ -66,4 +66,28 @@ int ScanDevices(
     I2C_HandleTypeDef hi2c
 );
 
+/**
+ * @brief Convert unsigned int number to char array
+ * 
+ * @param[in] address Address in number
+ * @param[out] output Output array
+ */
+void int_address_2_char_address(
+    uint16_t address,
+    char* output
+);
+
+/**
+ * @brief Convert double temp in celcius to char array
+ *
+ * @param digit Double temperature
+ * @param arr Array pointer
+ */
+void float_temp_to_char_temp(
+    double digit,
+    char* arr
+);
+
+void usleep(int min_range, int max_range);
+
 #endif /* INC_COMMON_H_ */

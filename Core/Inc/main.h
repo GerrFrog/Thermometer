@@ -29,7 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "common.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -56,25 +55,17 @@ extern "C" {
 // #define MLX90632_FLASH_MODE 
 
 /* If temperature has to be send to USB port */
-// #define USB_SEND 
+#define USB_SEND
 
 #ifdef SSD1306_DISPLAY
 #   include "ssd1306.h"
-#endif
-
-#if defined(MLX90614_DEBUG_MODE)
-#	include <mlx90614_debug.h>
-#elif defined(MLX90632_DEBUG_MODE)
-#	include <mlx90632_debug.h>
 #endif
 
 #if defined(MLX90614)
 #	include "mlx90614.h"
 #elif defined(MLX90632)
 #	include "mlx90632.h"
-#	include "mlx90632_depends.h"
 #endif
-
 
 /* USER CODE END Includes */
 
@@ -94,81 +85,10 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-/**
- * @brief Handler for Errors
- */
 void Error_Handler(void);
 
-#if defined(MLX90614) || defined(MLX90632)
 /* USER CODE BEGIN EFP */
-/**
- * @brief Convert double temp in celcius to char array
- * 
- * @param digit Double temperature
- * @param arr Array pointer
- */
-void float_temp_to_char_temp(
-    double digit, 
-    char* arr
-);
-#endif
 
-#if defined(MLX90632)
-/**
- * @brief Read EEPROM memory for parameters initializing
- * 
- * @param PR PR parameter
- * @param PG PG parameter
- * @param PO PO parameter
- * @param PT PT parameter
- * @param Ea Ea parameter
- * @param Eb Eb parameter
- * @param Fa Fa parameter
- * @param Fb Fb parameter
- * @param Ga Ga parameter
- * @param Gb Gb parameter
- * @param Ha Ha parameter
- * @param Hb Hb parameter
- * @param Ka Ka parameter
- * @return int 
- */
-static int mlx90632_read_eeprom(
-	int32_t *PR, 
-	int32_t *PG, 
-	int32_t *PO, 
-	int32_t *PT, 
-	int32_t *Ea, 
-	int32_t *Eb, 
-	int32_t *Fa, 
-	int32_t *Fb, 
-	int32_t *Ga, 
-	int16_t *Gb, 
-	int16_t *Ha, 
-	int16_t *Hb, 
-	int16_t *Ka, 
-	I2C_HandleTypeDef hi2c
-);
-
-/**
- * @brief Start work for MLX9632 in standard mode
- */
-void mlx90632_start_standard_mode();
-
-/**
- * @brief Start work for MLX90632 in extended mode
- */
-void mlx90632_start_extended_mode();
-
-/**
- * @brief Start work for MLX90632 in extended burst mode
- */
-void mlx90632_start_extended_burst_mode();
-#elif defined(MLX90614)
-/**
- * @brief Start work for MLX90614 in standard mode
- */
-void mlx90614_start_standard_mode();
-#endif
 
 /* USER CODE END EFP */
 

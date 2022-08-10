@@ -49,4 +49,39 @@ uint16_t device_scanner(I2C_HandleTypeDef hi2c)
 	return 0;
 }
 
+void int_address_2_char_address(
+    uint16_t address,
+    char* output
+)
+{
+	output[5] = '\0';
+	output[4] = address % 10 + '0';
+	address /= 10;
+	output[3] = address % 10 + '0';
+	address /= 10;
+	output[2] = address % 10 + '0';
+	address /= 10;
+	output[1] = address % 10 + '0';
+	address /= 10;
+	output[0] = address % 10 + '0';
+}
 
+void float_temp_to_char_temp(double digit, char* arr)
+{
+    int l_digit = digit * 100.0;
+    arr[7] = '\0';
+    arr[6] = '\0';
+    arr[5] = '\0';
+    arr[4] = l_digit % 10 + '0';
+    l_digit /= 10;
+    arr[3] = l_digit % 10 + '0';
+    l_digit /= 10;
+    arr[2] = ',';
+    arr[1] = l_digit % 10 + '0';
+    l_digit /= 10;
+    arr[0] = l_digit % 10 + '0';
+}
+
+void usleep(int min_range, int max_range) {
+	while(--min_range);
+}

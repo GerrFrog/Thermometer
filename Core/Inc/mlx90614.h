@@ -1,129 +1,112 @@
-/**
- * @file mlx90614.h
- * @author GerrFrog (ghaghal93@gmail.com)
- * @brief File contains all functions to work with MLX90614
- * @version 1.0
- * @date 2022-05-25
- * 
- * @copyright Copyright (c) 2022
+/*
+ * mlx90614_.h
+ *
+ *  Created on: Jun 7, 2022
+ *      Author: falls
  */
 
 #ifndef INC_MLX90614_H_
 #define INC_MLX90614_H_
 
-#include "common.h"
-#include "stm32f4xx_hal.h"
-#include <stdio.h>
+#include "mlx_common.h"
+#include "ssd1306.h"
 
-/* DEFAULT SLAVE ADDRESS */
-#define MLX90614_DEFAULT_SA 0x5A
+#define TO_MAX_STATUS "To max:"
+#define TO_MIN_STATUS "To min:"
+#define PWM_CF_REG_STATUS "PWM Cf Reg:"
+#define TA_RANGE_STATUS "Ta range"
+#define EMISSIVITY_STATUS "Emissivity:"
+#define CONFIG_REGISTER_STATUS "Config Reg:"
+#define SLAVE_ADDRESS_STATUS "Slave addr:"
+#define ID1_STATUS "ID1 Reg:"
+#define ID2_STATUS "ID2 Reg:"
+#define ID3_STATUS "ID3 Reg:"
+#define ID4_STATUS "ID4 Reg:"
 
 /* OPCODE DEFINES */
 #define MLX90614_OP_RAM		0x00
 #define MLX90614_OP_EEPROM	0x20
 #define MLX90614_OP_SLEEP	0xFF
 
-/* RAM offsets with 16-bit data, MSB first */
-#define MLX90614_RAW1		(MLX90614_OP_RAM | 0x04) /* raw data IR channel 1 */
-#define MLX90614_RAW2		(MLX90614_OP_RAM | 0x05) /* raw data IR channel 2 */
-#define MLX90614_TAMB 		(MLX90614_OP_RAM | 0x06) /* ambient temperature */
-#define MLX90614_TOBJ1 		(MLX90614_OP_RAM | 0x07) /* object 1 temperature */
-#define MLX90614_TOBJ2 		(MLX90614_OP_RAM | 0x08) /* object 2 temperature */
+typedef struct
+{
+    MLX_Device super_device;
 
-/* EEPROM offsets with 16-bit data, MSB first */
-#define MLX90614_TOMAX 		(MLX90614_OP_EEPROM | 0x00) /* object temperature min register */
-#define MLX90614_TOMIN 		(MLX90614_OP_EEPROM | 0x01) /* object temperature max register */
-#define MLX90614_PWMCTRL 	(MLX90614_OP_EEPROM | 0x02) /* pwm configuration register */
-#define MLX90614_TARANGE 	(MLX90614_OP_EEPROM | 0x03) /* ambient temperature register */
-#define MLX90614_EMISSIVITY (MLX90614_OP_EEPROM | 0x04) /* emissivity correction register */
-#define MLX90614_CFG1 		(MLX90614_OP_EEPROM | 0x05) /* configuration register */
-#define MLX90614_SA 		(MLX90614_OP_EEPROM | 0x0E) /* slave address register */
-#define MLX90614_ID1 		(MLX90614_OP_EEPROM | 0x1C) /*[read-only] 1 ID register */
-#define MLX90614_ID2 		(MLX90614_OP_EEPROM | 0x1D) /*[read-only] 2 ID register */
-#define MLX90614_ID3 		(MLX90614_OP_EEPROM | 0x1E) /*[read-only] 3 ID register */
-#define MLX90614_ID4 		(MLX90614_OP_EEPROM | 0x1F) /*[read-only] 4 ID register */
+    uint16_t  addr_raw1; /* raw data IR channel 1 */
 
-#define MLX90614_DBG_OFF 0
-#define MLX90614_DBG_ON 1
-#define MLX90614_DBG_MSG_W 0
-#define MLX90614_DBG_MSG_R 1
+    uint16_t  addr_raw2; /* raw data IR channel 2 */
 
-/**
- * @brief Write data to register
- *
- * @param devAddr Address of device
- * @param regAddr Address of register
- * @param data Data to write in register
- * @param hi2c Handler of I2C
- * @return void
- */
-void MLX90614_WriteReg(
-    uint8_t devAddr, 
-    uint8_t regAddr, 
-    uint16_t data, 
-    I2C_HandleTypeDef hi2c
+    uint16_t  addr_tamb; /* ambient temperature */
+
+    uint16_t  addr_tobj1; /* object 1 temperature */
+
+    uint16_t  addr_tobj2; /* object 2 temperature */
+
+    uint16_t  addr_tomax; /* object temperature min register */
+
+    uint16_t  addr_tomin; /* object temperature max register */
+
+    uint16_t  addr_pwmctrl; /* pwm configuration register */
+
+    uint16_t  addr_tarange; /* ambient temperature register */
+
+    uint16_t  addr_emissivity; /* emissivity correction register */
+
+    uint16_t  addr_cfg1; /* configuration register */
+
+    uint16_t  addr_sa; /* slave address register */
+
+    uint16_t  addr_id1; /*[read-only] 1 ID register */
+
+    uint16_t  addr_id2; /*[read-only] 2 ID register */
+
+    uint16_t  addr_id3; /*[read-only] 3 ID register */
+
+    uint16_t  addr_id4; /*[read-only] 4 ID register */
+
+} MLX90614;
+
+void MLX90614_ctor(
+    MLX90614* const me,
+    I2C_HandleTypeDef* hi2c,
+    uint16_t address
 );
 
-/**
- * @brief Read data from register
- *
- * @param devAddr Device address
- * @param regAddr Register address
- * @param dbg_lvl Debug level
- * @param hi2c Handler of I2C
- * @return uint16_t Register data
- */
-uint16_t MLX90614_ReadReg(
-    uint8_t devAddr, 
-    uint8_t regAddr, 
-    uint8_t dbg_lvl, 
-    I2C_HandleTypeDef hi2c
+void MLX90614_write_reg(
+    MLX90614* const me,
+    uint16_t regAddr,
+    uint16_t data
 );
 
-/**
- * @brief Read temperature from sensor
- *
- * @param devAddr Device address
- * @param regAddr Register address
- * @param hi2c Handler of I2C
- * @return float Temperature value
- */
-float MLX90614_ReadTemp(
-    uint8_t devAddr, 
-    uint8_t regAddr, 
-    I2C_HandleTypeDef hi2c
+uint16_t MLX90614_read_reg(
+    MLX90614* const me,
+    uint16_t regAddr
 );
 
-/**
- * @brief Send debug message
- *
- * @param op_type Operation mode with error (write/read)
- * @param devAddr Device address
- * @param regAddr Register address
- * @param data Input data
- * @param crc_in Checksum in
- * @param crc_calc Calculated checksum
- * @return void
- */
-void MLX90614_SendDebugMsg(
-    uint8_t op_type, 
-    uint8_t devAddr, 
-    uint8_t regAddr, 
-    uint16_t data, 
-    uint8_t crc_in, 
-    uint8_t crc_calc
+void MLX90614_read_temp(
+    MLX90614* const me
 );
 
-/**
- * @brief Temperatur compensation for value
- * 
- * @note https://arachnoid.com/polysolve/
- *
- * @param x Value
- * @return double
- */
-double MLX90614_temp_compensation(
-    double x
+void MLX90614_temp_compensation(
+    MLX90614* const me
 );
 
-#endif
+float MLX90614_get_current_temp(
+    MLX90614* const me
+);
+
+float MLX90614_get_comp_temp(
+    MLX90614* const me
+);
+
+void MLX90614_debug_mode(
+    MLX90614* const me
+);
+
+void MLX90614_flash_mode(
+    MLX90614* const me
+);
+
+void MLX90614_start_standard_mode();
+
+#endif /* INC_MLX90614_H_ */

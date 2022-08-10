@@ -30,12 +30,12 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
- ../Core/Inc/common.h ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h \
- ../Core/Inc/mlx90632.h ../Core/Inc/mlx90632_extended_meas.h \
- ../Core/Inc/mlx90632_depends.h \
+ ../Core/Inc/ssd1306.h ../Core/Inc/ssd1306_fonts.h ../Core/Inc/mlx90632.h \
+ ../Core/Inc/mlx_common.h ../Core/Inc/common.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h
@@ -102,13 +102,13 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o: \
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h:
-
-../Core/Inc/common.h:
 
 ../Core/Inc/ssd1306.h:
 
@@ -116,9 +116,9 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.o: \
 
 ../Core/Inc/mlx90632.h:
 
-../Core/Inc/mlx90632_extended_meas.h:
+../Core/Inc/mlx_common.h:
 
-../Core/Inc/mlx90632_depends.h:
+../Core/Inc/common.h:
 
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 

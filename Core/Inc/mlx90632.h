@@ -1,20 +1,17 @@
-/**
- * @file mlx90632.h
- * @author GerrFrog (ghaghal93@gmail.com)
- * @brief File contains all function to work with MLX90632 sensor
- * @version 1.0
- * @date 2022-05-25
- * 
- * @copyright Copyright (c) 2022
+/*
+ * mlx90632_.h
+ *
+ *  Created on: Jun 7, 2022
+ *      Author: falls
  */
 
 #ifndef INC_MLX90632_H_
 #define INC_MLX90632_H_
 
 #include <errno.h>
-#include "mlx90632_extended_meas.h"
-#include "mlx90632_depends.h"
-#include "stm32f4xx_hal.h"
+
+#include "mlx_common.h"
+#include "common.h"
 
 /* Solve errno not defined values */
 #ifndef ETIMEDOUT
@@ -45,7 +42,6 @@
 
 #ifndef GENMASK
 #	ifndef BITS_PER_LONG
-#		warning "Using default BITS_PER_LONG value"
 #		define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
 #	endif
 #	define GENMASK(h, l) (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
@@ -94,18 +90,6 @@
 #define MLX90632_EE_EXTENDED_MEAS2     0x24F2 /**< Extended measurement 2 16bit */
 #define MLX90632_EE_EXTENDED_MEAS3     0x24F3 /**< Extended measurement 3 16bit */
 
-/* Refresh Rate */
-typedef enum mlx90632_meas_e {
-    MLX90632_MEAS_HZ_ERROR = -1,
-    MLX90632_MEAS_HZ_HALF = 0,
-    MLX90632_MEAS_HZ_1 = 1,
-    MLX90632_MEAS_HZ_2 = 2,
-    MLX90632_MEAS_HZ_4 = 3,
-    MLX90632_MEAS_HZ_8 = 4,
-    MLX90632_MEAS_HZ_16 = 5,
-    MLX90632_MEAS_HZ_32 = 6,
-    MLX90632_MEAS_HZ_64 = 7,
-} mlx90632_meas_t;
 #define MLX90632_EE_REFRESH_RATE_START 10 /**< Refresh Rate Start bit */
 #define MLX90632_EE_REFRESH_RATE_SHIFT 8 /**< Refresh Rate shift */
 #define MLX90632_EE_REFRESH_RATE_MASK GENMASK(MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT) /**< Refresh Rate Mask */
@@ -190,341 +174,280 @@ typedef enum mlx90632_meas_e {
  */
 #define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
 
-/** 
- * @brief Read raw ambient and object temperature
- *
- * Trigger and read raw ambient and object temperatures. This values still need
- * to be pre-processed via @link mlx90632_preprocess_temp_ambient @endlink and @link
- * mlx90632_preprocess_temp_object @endlink functions and then processed via @link
- * mlx90632_calc_temp_ambient @endlink and @link mlx90632_calc_temp_object @endlink
- * to retrieve values in milliCelsius
- *
- * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
- * @param[out] object_new_raw Pointer to where new raw object temperature is written
- * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
- * @param[out] object_old_raw Pointer to where old raw object temperature is written
- *
- * @retval 0 Successfully read both temperatures
- * @retval <0 Something went wrong. Check errno.h for more details
- */
-int32_t mlx90632_read_temp_raw(
-    int16_t *ambient_new_raw, 
-    int16_t *ambient_old_raw,
-    int16_t *object_new_raw, 
-    int16_t *object_old_raw, 
-    I2C_HandleTypeDef hi2c
+/* Refresh Rate */
+typedef enum mlx90632_meas_e {
+    MLX90632_MEAS_HZ_ERROR = -1,
+    MLX90632_MEAS_HZ_HALF = 0,
+    MLX90632_MEAS_HZ_1 = 1,
+    MLX90632_MEAS_HZ_2 = 2,
+    MLX90632_MEAS_HZ_4 = 3,
+    MLX90632_MEAS_HZ_8 = 4,
+    MLX90632_MEAS_HZ_16 = 5,
+    MLX90632_MEAS_HZ_32 = 6,
+    MLX90632_MEAS_HZ_64 = 7,
+} MLX90632_meas_t;
+
+typedef struct
+{
+    MLX_Device super_device;
+
+    float pre_ambient;
+
+    float pre_object;
+
+    float ambient;
+
+    float object;
+
+    double emissivity;
+
+    int32_t PR;
+
+    int32_t PG;
+
+    int32_t PT;
+
+    int32_t PO;
+
+    int32_t Ea;
+
+    int32_t Eb;
+
+    int32_t Fa;
+
+    int32_t Fb;
+
+    int32_t Ga;
+
+    int16_t Gb;
+
+    int16_t Ha;
+
+    int16_t Hb;
+
+    int16_t Ka;
+
+    int16_t ambient_new_raw;
+
+    int16_t ambient_old_raw;
+
+    int16_t object_new_raw;
+
+    int16_t object_old_raw;
+} MLX90632;
+
+void MLX90632_ctor(
+    MLX90632* const me,
+    I2C_HandleTypeDef* hi2c,
+    uint16_t address
 );
 
-/** 
- * @brief Read raw ambient and object temperature in sleeping step mode
- *
- * Trigger and read raw ambient and object temperatures. This values still need
- * to be pre-processed via @link mlx90632_preprocess_temp_ambient @endlink and @link
- * mlx90632_preprocess_temp_object @endlink functions and then processed via @link
- * mlx90632_calc_temp_ambient @endlink and @link mlx90632_calc_temp_object @endlink
- * to retrieve values in milliCelsius
- *
- * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
- * @param[out] object_new_raw Pointer to where new raw object temperature is written
- * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
- * @param[out] object_old_raw Pointer to where old raw object temperature is written
- *
- * @retval 0 Successfully read both temperatures
- * @retval <0 Something went wrong. Check errno.h for more details
- */
-int32_t mlx90632_read_temp_raw_burst(
-    int16_t *ambient_new_raw, 
-    int16_t *ambient_old_raw,
-    int16_t *object_new_raw, 
-    int16_t *object_old_raw, 
-    I2C_HandleTypeDef hi2
+int MLX90632_read_eeprom(
+    MLX90632* const me
 );
 
-/** 
- * @brief Calculation of raw ambient output
- *
- * Preprocessing of the raw ambient value
- *
- * @param[in] ambient_new_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_num 1 or 2 is
- *                              determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] ambient_old_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_num 1 or 2 is
- *                              determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] Gb Register value on @link MLX90632_EE_Gb @endlink
- *
- * @return Calculated ambient raw output
- */
-double mlx90632_preprocess_temp_ambient(
-    int16_t ambient_new_raw, 
-    int16_t ambient_old_raw, 
-    int16_t Gb
+int32_t MLX90632_set_meas_type(
+    MLX90632* const me,
+    uint8_t type
 );
 
-/** 
- * @brief Calculation of raw object output
- *
- * Preprocessing of the raw object value
- *
- * @param[in] object_new_raw object temperature from @link MLX90632_RAM_1 @endlink or @link MLX90632_RAM_2 @endlink.
- *                              The meas_number 1 or 2 is determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] object_old_raw object temperature from @link MLX90632_RAM_1 @endlink or @link MLX90632_RAM_2 @endlink.
- *                              The meas_number 1 or 2 is determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] ambient_new_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_number 1 or 2 is
- *                              determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] ambient_old_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_number 1 or 2 is
- *                              determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] Ka Register value on @link MLX90632_EE_Ka @endlink
- *
- * @return Calculated object raw output
- */
-double mlx90632_preprocess_temp_object(
-    int16_t object_new_raw, 
-    int16_t object_old_raw,
-    int16_t ambient_new_raw, 
-    int16_t ambient_old_raw,
-    int16_t Ka
+void MLX90632_set_emissivity(
+    MLX90632* const me,
+    double emissivity
 );
 
-/** 
- * @brief Calculation of ambient temperature
- *
- * DSPv5 implementation of ambient temperature calculation
- *
- * @param[in] ambient_new_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The channel 1 or 2 is
- *                              determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] ambient_old_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The channel 1 or 2 is
- *                              determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
- * @param[in] P_T Register value on @link MLX90632_EE_P_T @endlink
- * @param[in] P_R Register value on @link MLX90632_EE_P_R @endlink
- * @param[in] P_G Register value on @link MLX90632_EE_P_G @endlink
- * @param[in] P_O Register value on @link MLX90632_EE_P_O @endlink
- * @param[in] Gb Register value on @link MLX90632_EE_Gb @endlink
- *
- * @return Calculated ambient temperature degrees Celsius
- */
-double mlx90632_calc_temp_ambient(
-    int16_t ambient_new_raw, 
-    int16_t ambient_old_raw, 
-    int32_t P_T,
-    int32_t P_R, 
-    int32_t P_G, 
-    int32_t P_O, 
-    int16_t Gb
+double MLX90632_get_emissivity(
+    MLX90632* const me
 );
 
-/** 
- * @brief Calculation of object temperature
- *
- * DSPv5 implementation of object temperature calculation with customer
- * calibration data
- *
- * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
- * @param[in] ambient ambient temperature from @link mlx90632_preprocess_temp_ambient @endlink
- * @param[in] Ea Register value on @link MLX90632_EE_Ea @endlink
- * @param[in] Eb Register value on @link MLX90632_EE_Eb @endlink
- * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
- * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
- * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
- * @param[in] Ha Register value on @link MLX90632_EE_Ha @endlink
- * @param[in] Hb Register value on @link MLX90632_EE_Hb @endlink
- *
- * @note emissivity Value provided by user of the object emissivity
- * using @link mlx90632_set_emissivity @endlink function.
- *
- * @return Calculated object temperature in milliCelsius
- */
+int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, uint8_t *channel_old)
+{
+    switch (ret)
+    {
+        case 1:
+            *channel_new = 1;
+            *channel_old = 2;
+            break;
+
+        case 2:
+            *channel_new = 2;
+            *channel_old = 1;
+            break;
+
+        default:
+            return -EINVAL;
+    }
+    return 0;
+}
+
+int32_t MLX90632_read_temp_ambient_raw(
+	MLX90632* const me
+)
+{
+    int32_t ret;
+    uint16_t read_tmp;
+
+    ret = MLX90632_i2c_read(MLX90632_RAM_3(1), &read_tmp, hi2c);
+    if (ret < 0)
+        return ret;
+    me->ambient_new_raw = (int16_t)read_tmp;
+
+    ret = MLX90632_i2c_read(MLX90632_RAM_3(2), &read_tmp, hi2c);
+    if (ret < 0)
+        return ret;
+    me->ambient_old_raw = (int16_t)read_tmp;
+
+    return ret;
+}
+
+int32_t MLX90632_read_temp_object_raw(
+	MLX90632* const me,
+	int32_t start_measurement_ret
+)
+{
+    int32_t ret;
+    uint16_t read_tmp;
+    int16_t read;
+    uint8_t channel, channel_old;
+
+    ret = MLX90632_channel_new_select(start_measurement_ret, &channel, &channel_old);
+    if (ret != 0)
+        return -EINVAL;
+
+    ret = mlx90632_i2c_read(MLX90632_RAM_2(channel), &read_tmp, hi2c);
+    if (ret < 0)
+        return ret;
+
+    read = (int16_t)read_tmp;
+
+    ret = mlx90632_i2c_read(MLX90632_RAM_1(channel), &read_tmp, hi2c);
+    if (ret < 0)
+        return ret;
+    *object_new_raw = (read + (int16_t)read_tmp) / 2;
+
+    ret = mlx90632_i2c_read(MLX90632_RAM_2(channel_old), &read_tmp, hi2c);
+    if (ret < 0)
+        return ret;
+    read = (int16_t)read_tmp;
+
+    ret = mlx90632_i2c_read(MLX90632_RAM_1(channel_old), &read_tmp, hi2c);
+    if (ret < 0)
+        return ret;
+    *object_old_raw = (read + (int16_t)read_tmp) / 2;
+
+    return ret;
+}
+
+int32_t MLX90632_read_temp_raw(
+	MLX90632* const me
+)
+{
+    int32_t ret, start_measurement_ret;
+
+    // trigger and wait for measurement to complete
+    start_measurement_ret = MLX90632_start_measurement(me);
+    if (start_measurement_ret < 0)
+        return start_measurement_ret;
+
+    /** Read new and old **ambient** values from sensor */
+    ret = MLX90632_read_temp_ambient_raw(me);
+    if (ret < 0)
+        return ret;
+
+    /** Read new and old **object** values from sensor */
+    ret = MLX90632_read_temp_object_raw(me, start_measurement_ret);
+
+    return ret;
+}
+
+int32_t MLX90632_read_temp_raw_extended(
+    MLX90632* const me
+);
+
+void MLX90632_calc_temp_ambient_extended(
+    MLX90632* const me
+);
+
+void MLX90632_preprocess_temp_ambient_extended(
+    MLX90632* const me
+);
+
+void MLX90632_preprocess_temp_object_extended(
+    MLX90632* const me
+);
+
+void MLX90632_calc_temp_object_extended(
+    MLX90632* const me
+);
+
 double mlx90632_calc_temp_object(
-    int32_t object, 
-    int32_t ambient,
-    int32_t Ea, 
-    int32_t Eb, 
-    int32_t Ga, 
-    int32_t Fa, 
-    int32_t Fb,
-    int16_t Ha, 
-    int16_t Hb
+	MLX90632* const me
 );
 
-/** 
- * @brief Calculation of object temperature when the environment temperature differs from the sensor temperature
- *
- * when the object has emissivity lower than 1 then it does not just emit InfraRed light, but also reflects it.
- * That is why measurement of the ambient temperature around object is important to help calculating more precise object temperature.
- * This function makes it possible to add object environment temperature and offset it with sensor's ambient temperature to calculate more precise
- * object temperature. DSPv5 implementation of object temperature calculation with customer
- * calibration data
- *
- * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
- * @param[in] ambient sensor ambient temperature from @link mlx90632_preprocess_temp_ambient @endlink
- * @param[in] reflected reflected (environment) temperature from a sensor different than the MLX90632 or acquired by other means
- * @param[in] Ea Register value on @link MLX90632_EE_Ea @endlink
- * @param[in] Eb Register value on @link MLX90632_EE_Eb @endlink
- * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
- * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
- * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
- * @param[in] Ha Register value on @link MLX90632_EE_Ha @endlink
- * @param[in] Hb Register value on @link MLX90632_EE_Hb @endlink
- *
- * @note emissivity Value provided by user of the object emissivity
- * using @link mlx90632_set_emissivity @endlink function.
- *
- * @return Calculated object temperature in milliCelsius
+int32_t MLX90632_i2c_read(
+    MLX90632* const me,
+    int16_t register_address,
+    uint16_t* value
+);
+
+int32_t MLX90632_i2c_read32(
+    MLX90632* const me,
+    int16_t register_address,
+    uint32_t* value
+);
+
+int32_t MLX90632_i2c_write(
+    MLX90632* const me,
+    int16_t register_address,
+    uint16_t value
+);
+
+int32_t MLX90632_addressed_reset(
+    MLX90632* const me
+);
+
+int MLX90632_start_measurement(
+    MLX90632* const me
+);
+
+int32_t MLX90632_read_temp_ambient_raw_extended(
+    MLX90632* const me
+);
+
+int32_t mlx90632_read_temp_object_raw_extended(
+    MLX90632* const me
+);
+
+double mlx90632_preprocess_temp_ambient_extended(
+    MLX90632* const me
+);
+
+double MLX90632_calc_temp_object_iteration_extended(
+    MLX90632* const me,
+    double prev_object_temp,
+    double TAdut,
+    double TaTr4,
+    double emissivity
+);
+
+void MLX90632_preprocess_temp_ambient(
+	MLX90632* const me
+);
+
+
+/**
+ * @brief Start work for MLX9632 in standard mode
  */
-double mlx90632_calc_temp_object_reflected(
-    int32_t object, 
-    int32_t ambient, 
-    double reflected,
-    int32_t Ea, 
-    int32_t Eb, 
-    int32_t Ga, 
-    int32_t Fa, 
-    int32_t Fb,
-    int16_t Ha, 
-    int16_t Hb
-);
+void MLX90632_standard_mode_measure();
 
-/** 
- * @brief Initialize MLX90632 driver and confirm EEPROM version
- *
- * EEPROM version is important to match sensor EEPROM content and calculations.
- * This is why this function checks for correct EEPROM version before it does
- * checksum validation of the EEPROM content.
- *
- * @note EEPROM version can have swapped high and low bytes due to CPU or I2C.
- * Please confirm that i2c read (16bit) is functioning as expected.
- *
- * @retval 0 Successfully initialized MLX90632 driver, extended range measurement not supported
- * @retval @link ERANGE @endlink Successfully initialized MLX90632 driver, extended range measurement is supported
- * @retval <0 Something went wrong. Consult errno.h for more details.
+/**
+ * @brief Start work for MLX90632 in extended mode
  */
-int32_t mlx90632_init(
-    I2C_HandleTypeDef hi2c
-);
+void MLX90632_extended_mode_measure();
 
-/** 
- * @brief Trigger start measurement for mlx90632
- *
- * Trigger measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
- *
- * @retval <0 Something failed. Check errno.h for more information
- * @retval >=0 Channel position where new (recently updated) measurement can be found
- *
- * @note This function is using usleep so it is blocking!
+/**
+ * @brief Start work for MLX90632 in extended burst mode
  */
-int mlx90632_start_measurement(
-    I2C_HandleTypeDef hi2c
-);
-
-/** 
- * @brief Set emissivity which is retained in single variable.
- *
- * @param[in] value Value provided by user of object emissivity. Defaults to 1.0 and cannot be 0.0.
- *
- * @warning This is not suitable for multi-process calculations as we do not use instances
- */
-void mlx90632_set_emissivity(
-    double value
-);
-
-/** 
- * @brief Read value of emissivity
- */
-double mlx90632_get_emissivity(void);
-
-/** 
- * @brief Trigger start of burst measurement for mlx90632
- *
- * Trigger a single measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
- * The SOB bit is set so that the complete measurement table is re-freshed.
- *
- * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurement has started.
- *
- * @retval <0 Something failed. Check errno.h for more information
- * @retval 0 New data is available and waiting to be processed
- *
- * @note This function is using usleep and msleep. Because of usleep it is blocking, while msleep implementation can have a thread switch!
- * In case both are blocking expect up to 2 second freeze of CPU in worse case scenario (depending on Refresh rate setting), so
- * you might also need to take care of Watch Dog.
- */
-int32_t mlx90632_start_measurement_burst(
-    I2C_HandleTypeDef hi2c
-);
-
-/** 
- * @brief Reads the refresh rate and calculates the time needed for a single measurment from the EEPROM settings.
- *
- * @param[in] meas Measurement to read the frefresh rate for
- *
- * @retval >=0 Refresh time in ms
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
-int32_t mlx90632_get_measurement_time(
-    uint16_t meas, 
-    I2C_HandleTypeDef hi2c
-);
-
-/** 
- * @brief Reads the refresh rate and calculates the time needed for a whole measurment table from the EEPROM settings.
- *
- * The function is returning valid measurement time only for burst mode measurements.
- * An error will be returned if it is called with a continuous measurement type parameter.
- *
- * @retval >=0 Refresh time in ms
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
-int32_t mlx90632_calculate_dataset_ready_time(
-    I2C_HandleTypeDef hi2c
-);
-
-/** 
- * @brief Trigger system reset for mlx90632
- *
- * Perform full reset of mlx90632 using reset command.
- * It also waits for at least 150us to ensure the mlx90632 device is properly reset and ready for further communications.
- *
- * @retval <0 Something failed. Check errno.h for more information
- * @retval 0 The mlx90632 device was properly reset and is now ready for communication.
- *
- * @note This function is using usleep so it is blocking!
- */
-int32_t mlx90632_addressed_reset(
-    I2C_HandleTypeDef hi2c
-);
-
-/** 
- * @brief Sets the refresh rate of the sensor using the MLX90632_EE_MEAS_1 and MLX90632_EE_MEAS_2 registers
- *
- * @param[in] measRate refresh rate to set with #mlx90632_meas_e
- *
- * @retval <0 Something went wrong. Consult errno.h for more details.
- */
-int32_t mlx90632_set_refresh_rate(
-    mlx90632_meas_t measRate, 
-    I2C_HandleTypeDef hi2c
-);
-
-/** 
- * @brief Gets the value in MLX90632_EE_MEAS_1 and converts it to the appropriate MLX90632_MEAS enum
- *
- * @retval MLX90632_MEAS_HZ_ERROR if there is an error
- * @retval refresh_rate as the #mlx90632_meas_e
- */
-mlx90632_meas_t mlx90632_get_refresh_rate(
-    I2C_HandleTypeDef hi2c
-);
-
-#ifdef TEST
-int32_t mlx90632_read_temp_ambient_raw(
-    int16_t *ambient_new_raw, 
-    int16_t *ambient_old_raw, 
-    I2C_HandleTypeDef hi2c
-);
-int32_t mlx90632_read_temp_object_raw(
-    int32_t start_measurement_ret,
-    int16_t *object_new_raw, 
-    int16_t *object_old_raw, 
-    I2C_HandleTypeDef hi2c
-);
-
-#endif
+void MLX90632_extended_burst_mode_measure();
 
 #endif /* INC_MLX90632_H_ */

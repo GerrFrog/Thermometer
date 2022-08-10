@@ -1,2 +1,4 @@
 common.c:9:9:CRC8_Calc	24	static
 common.c:29:10:device_scanner	16	static
+common.c:52:6:int_address_2_char_address	16	static
+common.c:69:6:usleep	16	static
