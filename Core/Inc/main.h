@@ -29,7 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "common.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -38,7 +37,7 @@ extern "C" {
 #define SSD1306_DISPLAY 
 
 /* If MLX90614 termometer is on */
-// #define MLX90614
+#define MLX90614
 
 /* If MLX90632 termometer is on */
 #define MLX90632
@@ -68,12 +67,15 @@ extern "C" {
 #	include <mlx90632_debug.h>
 #endif
 
-#if defined(MLX90614)
-#	include "mlx90614.h"
-#elif defined(MLX90632)
-#	include "mlx90632.h"
-#	include "mlx90632_depends.h"
-#endif
+//#if defined(MLX90614)
+//#	include "mlx90614.h"
+//#elif defined(MLX90632)
+//#	include "mlx90632.h"
+//#	include "mlx90632_depends.h"
+//#endif
+#include "mlx90614.h"
+#include "mlx90632.h"
+#include "mlx90632_depends.h"
 
 
 /* USER CODE END Includes */
@@ -94,12 +96,8 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-/**
- * @brief Handler for Errors
- */
 void Error_Handler(void);
 
-#if defined(MLX90614) || defined(MLX90632)
 /* USER CODE BEGIN EFP */
 /**
  * @brief Convert double temp in celcius to char array
@@ -111,9 +109,9 @@ void float_temp_to_char_temp(
     double digit, 
     char* arr
 );
-#endif
+// #endif
 
-#if defined(MLX90632)
+//#if defined(MLX90632)
 /**
  * @brief Read EEPROM memory for parameters initializing
  * 
@@ -163,12 +161,12 @@ void mlx90632_start_extended_mode();
  * @brief Start work for MLX90632 in extended burst mode
  */
 void mlx90632_start_extended_burst_mode();
-#elif defined(MLX90614)
+//#elif defined(MLX90614)
 /**
  * @brief Start work for MLX90614 in standard mode
  */
 void mlx90614_start_standard_mode();
-#endif
+//#endif
 
 /* USER CODE END EFP */
 
