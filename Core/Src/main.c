@@ -108,7 +108,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if (HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0))
 		{
 			// Wait untill time ends
-			if (tim_wait_segment == 13)
+			if (tim_wait_segment == 100)
 			{
 				// crutch
 				if (mlx90614_mode)
@@ -120,7 +120,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else
 			{
-				if (tim_wait_segment > 13)
+				if (tim_wait_segment > 100)
 					{
 						while (HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0))
 							HAL_Delay(100);
@@ -132,6 +132,30 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 		else
 		{
+			if (tim_wait_segment > 4)
+			{
+#				ifdef SSD1306_DISPLAY
+				float_temp_to_char_temp(float_temp_1, char_temp_1);
+				float_temp_to_char_temp(float_temp_2, char_temp_2);
+
+				SSD1306_GotoXY(0, 0);
+				SSD1306_Puts(char_temp_1, &Font_11x18, 1);
+
+				SSD1306_GotoXY(70, 0);
+				SSD1306_Puts(char_temp_2, &Font_11x18, 1);
+#	 		    endif
+
+#			    ifdef USB_SEND
+				CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
+				CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
+				CDC_Transmit_FS(end, strlen(end));
+
+				CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
+				CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
+				CDC_Transmit_FS(end, strlen(end));
+#  		   		endif
+			}
+
 			tim_wait_segment = 0;
 		}
 		HAL_TIM_IRQHandler(&htim1);
@@ -323,7 +347,7 @@ void mlx90632_start_extended_mode()
     while(!mlx90614_mode)
     {
 
-    	mlx90632_set_emissivity(0.5);
+    	mlx90632_set_emissivity(0.85);
 
     	mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw, hi2c2);
 
@@ -338,28 +362,9 @@ void mlx90632_start_extended_mode()
         object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 
         float_temp_1 = object;
-        float_temp_to_char_temp(float_temp_1, char_temp_1);
 
-        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
-        {
-#	        ifdef SSD1306_DISPLAY
-            SSD1306_GotoXY(0, 0);
-            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
-
-            SSD1306_GotoXY(70, 0);
-            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
-#	        endif
-
-#		    ifdef USB_SEND
-            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
-            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-            CDC_Transmit_FS(end, strlen(end));
-
-            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
-            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-            CDC_Transmit_FS(end, strlen(end));
-#  		    endif
-        }
+		float_temp_to_char_temp(float_temp_1, char_temp_1);
+//		float_temp_to_char_temp(float_temp_2, char_temp_2);
 
 #       ifdef SSD1306_DISPLAY
         SSD1306_GotoXY(0, 29);
@@ -458,11 +463,11 @@ void mlx90614_start_standard_mode()
     uint16_t mlx_addr_1 = device_scanner(hi2c1);
     uint16_t mlx_addr_2 = device_scanner(hi2c2);
 
-    float float_temp_1 = 0.0;
-    float float_temp_2 = 0.0;
-
-    char char_temp_1[8];
-    char char_temp_2[8];
+//    float float_temp_1 = 0.0;
+//    float float_temp_2 = 0.0;
+//
+//    char char_temp_1[8];
+//    char char_temp_2[8];
 
 #   ifdef SSD1306_DISPLAY
     SSD1306_Clear();
@@ -474,29 +479,8 @@ void mlx90614_start_standard_mode()
         float_temp_1 = MLX90614_temp_compensation(float_temp_1);
         float_temp_2 = MLX90614_ReadTemp(mlx_addr_2, MLX90614_TOBJ1, hi2c2);
 
-        float_temp_to_char_temp(float_temp_1, char_temp_1);
-        float_temp_to_char_temp(float_temp_2, char_temp_2);
-
-        if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)==GPIO_PIN_SET)
-        {
-#	        ifdef SSD1306_DISPLAY
-            SSD1306_GotoXY(0, 0);
-            SSD1306_Puts(char_temp_1, &Font_11x18, 1);
-
-            SSD1306_GotoXY(70, 0);
-            SSD1306_Puts(char_temp_2, &Font_11x18, 1);
-#	        endif
-
-#		    ifdef USB_SEND
-            CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
-            CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
-            CDC_Transmit_FS(end, strlen(end));
-
-            CDC_Transmit_FS(cap_mess_2, strlen(cap_mess_2));
-            CDC_Transmit_FS((uint8_t*)char_temp_2, strlen((uint8_t*)char_temp_2));
-            CDC_Transmit_FS(end, strlen(end));
-#		    endif
-        }
+		float_temp_to_char_temp(float_temp_1, char_temp_1);
+		float_temp_to_char_temp(float_temp_2, char_temp_2);
 
 #       ifdef SSD1306_DISPLAY
         SSD1306_GotoXY(0, 29);
@@ -799,7 +783,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 9999;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 399;
+  htim1.Init.Period = 39;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV4;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
