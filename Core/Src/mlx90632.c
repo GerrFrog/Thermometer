@@ -692,3 +692,25 @@ mlx90632_meas_t mlx90632_get_refresh_rate(I2C_HandleTypeDef hi2c)
 
     return (mlx90632_meas_t)MLX90632_REFRESH_RATE(meas1);
 }
+
+double mlx90632_temp_compensation(
+	double x
+)
+{
+	double terms[] = {
+		-1.3302318898466820e+002,
+		9.6307970719508571e+000,
+		-1.3661870266925949e-001
+	};
+
+	size_t csz = sizeof terms / sizeof *terms;
+
+	double t = 1;
+	double r = 0;
+	for (int i = 0; i < csz;i++)
+	{
+		r += terms[i] * t;
+		t *= x;
+	}
+	return r;
+}

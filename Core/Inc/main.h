@@ -55,7 +55,7 @@ extern "C" {
 // #define MLX90632_FLASH_MODE 
 
 /* If temperature has to be send to USB port */
-// #define USB_SEND 
+#define USB_SEND
 
 #ifdef SSD1306_DISPLAY
 #   include "ssd1306.h"

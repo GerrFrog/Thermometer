@@ -50,6 +50,8 @@ I2C_HandleTypeDef hi2c3;
 
 TIM_HandleTypeDef htim1;
 
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
 
 uint8_t buffer[64];
@@ -91,6 +93,7 @@ static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -146,6 +149,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 #	 		    endif
 
 #			    ifdef USB_SEND
+				HAL_UART_Transmit_IT(&huart2, cap_mess_1, strlen(cap_mess_1));
+//				HAL_UART_Transmit_IT(&huart2, hello, strlen(hello));
+
 				CDC_Transmit_FS(cap_mess_1, strlen(cap_mess_1));
 				CDC_Transmit_FS((uint8_t*)char_temp_1, strlen((uint8_t*)char_temp_1));
 				CDC_Transmit_FS(end, strlen(end));
@@ -362,9 +368,10 @@ void mlx90632_start_extended_mode()
         object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 
         float_temp_1 = object;
+        float_temp_2 = mlx90632_temp_compensation(float_temp_1);
 
 		float_temp_to_char_temp(float_temp_1, char_temp_1);
-//		float_temp_to_char_temp(float_temp_2, char_temp_2);
+		float_temp_to_char_temp(float_temp_2, char_temp_2);
 
 #       ifdef SSD1306_DISPLAY
         SSD1306_GotoXY(0, 29);
@@ -545,6 +552,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_I2C3_Init();
   MX_TIM1_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
     /**
@@ -588,13 +596,20 @@ int main(void)
 
 
     HAL_TIM_Base_Start_IT(&htim1);
+
+    char* hello = "Hello world!\n\0";
+
+
     // main cycle
     while(1)
     {
-		if (mlx90614_mode)
-			mlx90614_start_standard_mode();
-		else
-			mlx90632_start_extended_mode();
+//    	HAL_UART_Transmit(&huart2, hello, strlen(hello), 100);
+    	HAL_UART_Transmit_IT(&huart2, cap_mess_1, strlen(cap_mess_1));
+    	HAL_Delay(100);
+//		if (mlx90614_mode)
+//			mlx90614_start_standard_mode();
+//		else
+//			mlx90632_start_extended_mode();
     }
 
 
@@ -805,6 +820,39 @@ static void MX_TIM1_Init(void)
   /* USER CODE BEGIN TIM1_Init 2 */
 
   /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
 
 }
 

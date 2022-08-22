@@ -512,6 +512,10 @@ mlx90632_meas_t mlx90632_get_refresh_rate(
     I2C_HandleTypeDef hi2c
 );
 
+double mlx90632_temp_compensation(
+	double x
+);
+
 #ifdef TEST
 int32_t mlx90632_read_temp_ambient_raw(
     int16_t *ambient_new_raw, 

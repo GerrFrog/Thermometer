@@ -24,3 +24,4 @@ mlx90632.c:619:16:mlx90632_erase_eeprom	112	static
 mlx90632.c:634:16:mlx90632_write_eeprom	112	static
 mlx90632.c:653:9:mlx90632_set_refresh_rate	120	static
 mlx90632.c:684:17:mlx90632_get_refresh_rate	104	static
+mlx90632.c:696:8:mlx90632_temp_compensation	72	static
