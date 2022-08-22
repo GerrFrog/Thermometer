@@ -32,6 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "cjson.h"
 
 /* If SSD1306 display is on */
 #define SSD1306_DISPLAY 

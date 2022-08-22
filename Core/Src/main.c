@@ -599,12 +599,16 @@ int main(void)
 
     char* hello = "Hello world!\n\0";
 
+   cJSON* root = cJSON_CreateObject();
+   cJSON_AddStringToObject(root, "name", "Hello world");
+   char* string = cJSON_PrintUnformatted(root);
 
     // main cycle
     while(1)
     {
 //    	HAL_UART_Transmit(&huart2, hello, strlen(hello), 100);
-    	HAL_UART_Transmit_IT(&huart2, cap_mess_1, strlen(cap_mess_1));
+    	HAL_UART_Transmit_IT(&huart2, string, strlen(string) + 1);
+//    	HAL_UART_Transmit_IT(&huart2, hello, strlen(hello) + 1);
     	HAL_Delay(100);
 //		if (mlx90614_mode)
 //			mlx90614_start_standard_mode();
